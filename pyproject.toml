@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "PythonVCS"
 version = "0.0.1"
-description = "API wrapper for github, gitlab, gitea, pijul nest, etc."
+description = "API wrapper for gitea, pijul nest, etc."
 authors = ["MisileLaboratory"]
 license = "Misilelab license v1.6"
 
