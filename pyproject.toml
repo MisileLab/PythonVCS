@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "PythonVCS"
+version = "0.0.1"
+description = "API wrapper for github, gitlab, gitea, pijul nest, etc."
+authors = ["MisileLaboratory"]
+license = "Misilelab license v1.6"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.27.1"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.931"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
