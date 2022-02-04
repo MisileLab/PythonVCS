@@ -22,6 +22,8 @@ jobs:
         ls -al
         cd PythonVCS
         ls -al
+        cd PythonVCS
+        ls -al
         poetry install
         poetry build
     - name: Install PythonVCS for build docs
