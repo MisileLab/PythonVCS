@@ -68,6 +68,12 @@ class WrongJSONError(Exception):
         super().__init__(f"Wrong json key: {data}")
         self.data = data
 
+class Visibility:
+    """Visibility for vaild visibility property."""
+    public = "public"
+    limited = "limited"
+    private = "private"
+
 class GiteaUser:
     """Class for find gitea user properties easily."""
     def __init__(self, response: Response):
@@ -103,7 +109,7 @@ class GiteaUser:
         self.website: str = responsejson["website"]
 
     @staticmethod
-    def string_to_visibility(string: str) -> str or None: # type: ignore
+    def string_to_visibility(string: str) -> Visibility or None: # type: ignore
         """Check visibility.
         Args:
             string (str): String that will be checked.
@@ -119,12 +125,6 @@ class GiteaUser:
             return Visibility.limited
         else:
             return None
-
-class Visibility:
-    """Visibility for vaild visibility property."""
-    public = "public"
-    limited = "limited"
-    private = "private"
 
 def random_key() -> str:
     """Random key for secure random."""

@@ -29,10 +29,40 @@ raised when JSON does not have right key.
 
 Class for find gitea user properties easily.
 
-## Arguments
+### Arguments
 
     response (Response): The /user response.
 
-## Raises
+### Raises
 
     WrongJSONError: When JSON is invaild.
+
+### Static method string_to_visibility
+
+Check visibility property.
+
+#### Arguments
+
+    string (str): String that will be checked.
+
+#### Return
+
+    Visibility or None: if visibility is vaild, return visibility class. else, return None
+
+## Class Visibility
+
+Visibility for vaild visibility property.
+
+### Values
+
+    public = "public"
+    limited = "limited"
+    private = "private"
+
+## Method random_key
+
+Random key for secure random.
+
+### Return
+
+    str: Return key encrypted with random value and sha3-512.
