@@ -26,11 +26,10 @@ jobs:
         pip install dist/*.whl
     - name: Build docs
       run: |
-        cd /home/runner/work/PythonVCS
         sphinx-apidoc -o docs/source PythonVCS
-        cd /home/runner/work/PythonVCS/docs
+        cd docs
         make html
-        cd /home/runner/work/PythonVCS
+        cd ../
     - name: Publish html
       uses: JamesIves/github-pages-deploy-action@v4.2.3
       with:
