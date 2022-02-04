@@ -17,6 +17,7 @@ You can install this package using pip like this: ```pip install PythonVCS```
 You can contribute this package, that's why this package is open source.
 
 1. Install [poetry](https://github.com/python-poetry/poetry).
-2. Contributing this package for typo issue or performance issue, new feature, etc.
-3. This package requires mypy check. Please check type with mypy.
-4. Create pull request!
+2. Install dependencies with this command: ```poetry install```
+3. Contributing this package for typo issue or performance issue, new feature, etc.
+4. This package requires mypy check. Please check type with mypy.
+5. Create pull request!
