@@ -20,9 +20,11 @@ jobs:
       run: |
         cd /home/runner/work
         ls -al
-        cd PythonVCS
+        cd /home/runner/work/PythonVCS
         ls -al
-        cd PythonVCS
+        cd home/runner/work/PythonVCS/PythonVCS
+        ls -al
+        cd home/runner/work/PythonVCS/PythonVCS/PythonVCS
         ls -al
         poetry install
         poetry build
