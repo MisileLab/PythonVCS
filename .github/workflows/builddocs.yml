@@ -25,9 +25,9 @@ jobs:
     - name: Build docs
       run: |
         cd /home/runner/work/PythonVCS
+        ls -al docs
         sphinx-apidoc -o docs/source PythonVCS
         cd /home/runner/work/PythonVCS/docs
-        ls -al
         make html
         cd /home/runner/work/PythonVCS
     - name: Publish html
