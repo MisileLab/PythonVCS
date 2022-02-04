@@ -27,7 +27,8 @@ jobs:
         cd /home/runner/work/PythonVCS
         sphinx-apidoc -o docs/source PythonVCS
         cd /home/runner/work/PythonVCS/docs
-        sphinx-build -b html . _build
+        ls -al
+        make html
         cd /home/runner/work/PythonVCS
     - name: Publish html
       uses: JamesIves/github-pages-deploy-action@v4.2.3
