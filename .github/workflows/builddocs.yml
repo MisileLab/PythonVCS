@@ -1,0 +1,29 @@
+name: Build docs
+on: push
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        pip install sphinx
+        pip install sphinx-rtd-theme
+    - name: Build docs
+      run: |
+        sphinx-apidoc -o docs/source PythonVCS
+        cd docs/
+        make html
+        cd ${{ env.working-directory }}
+    - name: Publish html
+      uses: JamesIves/github-pages-deploy-action@v4.2.3
+      with:
+        branch: gh-pages
+        folder: docs/_build/html
