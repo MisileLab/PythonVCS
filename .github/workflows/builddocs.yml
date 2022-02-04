@@ -10,7 +10,6 @@ jobs:
     - name: Clone repository
       run: |
         git clone "https://github.com/MisileLab/PythonVCS"
-        cd PythonVCS/
     - name: Set up python
       uses: actions/setup-python@v2
       with:
