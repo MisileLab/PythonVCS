@@ -1,3 +1,3 @@
-## VCSHandler docs
+# VCSHandler docs
 
 [Gitea](/docsgitea.md)

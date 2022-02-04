@@ -21,3 +21,7 @@ You can contribute this package, that's why this package is open source.
 3. Contributing this package for typo issue or performance issue, new feature, etc.
 4. This package requires mypy check. Please check type with mypy.
 5. Create pull request!
+
+## API Documentation
+
+[API Docs](/docs.md)
