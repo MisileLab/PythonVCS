@@ -27,6 +27,7 @@ jobs:
         cd /home/runner/work/PythonVCS
         sphinx-apidoc -o docs/source PythonVCS
         cd docs/
+        make
         make html
         cd /home/runner/work/PythonVCS
     - name: Publish html
