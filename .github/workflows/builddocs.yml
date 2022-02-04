@@ -7,7 +7,10 @@ jobs:
     env:
       working-directory: ./
     steps:
-    - uses: actions/checkout@v2
+    - name: Clone repository
+      run: |
+        git clone "https://github.com/MisileLab/PythonVCS"
+        cd PythonVCS/
     - name: Set up python
       uses: actions/setup-python@v2
       with:
@@ -25,7 +28,6 @@ jobs:
     - name: Build docs
       run: |
         cd /home/runner/work/PythonVCS
-        ls -al docs
         sphinx-apidoc -o docs/source PythonVCS
         cd /home/runner/work/PythonVCS/docs
         make html
