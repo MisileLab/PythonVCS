@@ -102,7 +102,14 @@ class GiteaUser:
         self.website: str = responsejson["website"]
 
     @staticmethod
-    def string_to_visibility(string: str) -> str or None:
+    def string_to_visibility(string: str) -> str or None: # type: ignore
+        """Check visibility.
+        Args:
+            string (str): String that will be checked.
+
+        Returns:
+            str or None: if visibility is vaild, return visibility class. else, return None
+        """
         if string == "public":
             return Visibility.public
         elif string == "private":
@@ -113,9 +120,11 @@ class GiteaUser:
             return None
 
 class Visibility:
+    """Visibility for vaild visibility property."""
     public = "public"
     limited = "limited"
     private = "private"
 
 def random_key() -> str:
+    """Random key for secure random."""
     return hashlib.sha3_512(str(SystemRandom().randint(1, 10000000)).encode('utf-8')).hexdigest()
