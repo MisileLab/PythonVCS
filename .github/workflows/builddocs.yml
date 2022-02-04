@@ -18,7 +18,10 @@ jobs:
       uses: snok/install-poetry@v1.3.0
     - name: Install dependencies and build
       run: |
-        cd /home/runner/work/PythonVCS
+        cd /home/runner/work
+        ls -al
+        cd PythonVCS
+        ls -al
         poetry install
         poetry build
     - name: Install PythonVCS for build docs
