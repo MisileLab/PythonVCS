@@ -24,6 +24,7 @@ jobs:
         pip install dist/*.whl
     - name: Build docs
       run: |
+        cd ${{ env.working-directory }}
         sphinx-apidoc -o docs/source PythonVCS
         cd docs/
         make html
