@@ -9,7 +9,7 @@ import hashlib
 
 class GiteaHandler:
     """Handler for gitea."""
-    def __init__(self, name: str, password: str or None, url: str, token: str or None = None, cleanup: bool = True): # type: ignore
+    def __init__(self, name: str, password: str or None, url: str, token: str or None = None, cleanup: bool = True):    # type: ignore
         """
         Generate gitea handler.
 
@@ -30,7 +30,7 @@ class GiteaHandler:
         self.url = url
         if self.url.endswith('/'):
             self.url = self.url.removesuffix('/')
-        self.url = self.url + "/api/v1"
+        self.url = f'{self.url}/api/v1'
         if token is None and password is not None:
             responseget: Response = requests.get(f"{self.url}/users/{self.name}/tokens", auth=(self.name, password))
             if cleanup:
@@ -50,8 +50,9 @@ class GiteaHandler:
             self.token = token
         self.defaultheader: dict[str, str] = {
             "accept": "application/json",
-            "Authorization": "token " + self.token
+            "Authorization": f'token {self.token}',
         }
+
         self.user = GiteaUser(requests.get(f"{self.url}/user", headers=self.defaultheader))
 
 class GiteaAPIError(Exception):
