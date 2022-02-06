@@ -47,11 +47,11 @@ Remove emails from token owner.
 
 #### Arguments
 
-            emails (list[str]): Emails that will be removed.
+    emails (list[str]): Emails that will be removed.
 
 #### Raises
 
-            GiteaAPIError: When gitea api status code does not 204(success).
+    GiteaAPIError: When gitea api status code does not 204(success).
 
 ## Class GiteaAPIError: Exception
 
