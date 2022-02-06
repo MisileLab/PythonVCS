@@ -7,53 +7,19 @@ from requests import Response
 from secrets import SystemRandom
 import hashlib
 
-class GiteaHandler:
-    """Handler for gitea."""
-    def __init__(self, name: str, password: str or None, url: str, token: str or None = None, cleanup: bool = True):    # type: ignore
+class GiteaEmail:
+    def __init__(self, email: str, primary: bool, verified: bool):
         """
-        Generate gitea handler.
+        Gitea email properties.
 
         Args:
-            name (str): The name of gitea user.
-            password (str or None): The password of gitea user. Need for cleanup and token generation.
-            url (str): The url of gitea.
-            token (str or None, optional): Token for gitea. Defaults to None.
-            cleanup (bool, optional): Cleanup token that giteahandler made. Defaults to True.
-
-        Raises:
-            ValueError: When dictionary is wrong.
-            GiteaAPIError: When gitea api status code does not 201(success).
+            email (str): Email address.
+            primary (bool): Is primary email.
+            verified (bool): Is verified email.
         """
-        if (token is None and password is None) or (password is None and cleanup is not None):
-            raise ValueError("not right parameter.")
-        self.name = name
-        self.url = url
-        if self.url.endswith('/'):
-            self.url = self.url.removesuffix('/')
-        self.url = f'{self.url}/api/v1'
-        if token is None and password is not None:
-            responseget: Response = requests.get(f"{self.url}/users/{self.name}/tokens", auth=(self.name, password))
-            if cleanup:
-                for i in responseget.json():
-                    namea: str = i["name"]
-                    if namea.startswith("gitea-pythonvcs-"):
-                        requests.delete(f"{self.url}/users/{self.name}/tokens/{namea}", auth=(self.name, password))
-            data: dict[str, str] = {
-                "name": "gitea-pythonvcs-" + random_key()
-            }
-            response: Response = requests.post(f"{self.url}/users/{self.name}/tokens", auth=(self.name, password), data=data)
-            if response.status_code != 201:
-                raise GiteaAPIError(response, response.status_code)
-            else:
-                self.token: str = response.json()["sha1"]
-        else:
-            self.token = token
-        self.defaultheader: dict[str, str] = {
-            "accept": "application/json",
-            "Authorization": f'token {self.token}',
-        }
-
-        self.user = GiteaUser(requests.get(f"{self.url}/user", headers=self.defaultheader))
+        self.email: str = email
+        self.primary: bool = primary
+        self.verified: bool = verified
 
 class GiteaAPIError(Exception):
     """raised when api does not success."""
@@ -125,6 +91,96 @@ class GiteaUser:
             return Visibility.limited
         else:
             return None
+
+class GiteaHandler:
+    """Handler for gitea."""
+    def __init__(self, name: str, password: str or None, url: str, token: str or None = None, cleanup: bool = True):    # type: ignore
+        """
+        Generate gitea handler.
+
+        Args:
+            name (str): The name of gitea user.
+            password (str or None): The password of gitea user. Need for cleanup and token generation.
+            url (str): The url of gitea.
+            token (str or None, optional): Token for gitea. Defaults to None.
+            cleanup (bool, optional): Cleanup token that giteahandler made. Defaults to True.
+
+        Raises:
+            ValueError: When token and password is None or password is None and cleanup is True.
+            GiteaAPIError: When gitea api status code does not 201(success).
+        """
+        if (token is None and password is None) or password is None and cleanup:
+            raise ValueError("not right parameter.")
+        self.name = name
+        self.url = url
+        if self.url.endswith('/'):
+            self.url = self.url.removesuffix('/')
+        self.url = f'{self.url}/api/v1'
+        if token is None and password is not None:
+            responseget: Response = requests.get(f"{self.url}/users/{self.name}/tokens", auth=(self.name, password))
+            if cleanup:
+                for i in responseget.json():
+                    namea: str = i["name"]
+                    if namea.startswith("gitea-pythonvcs-"):
+                        requests.delete(f"{self.url}/users/{self.name}/tokens/{namea}", auth=(self.name, password))
+            data: dict[str, str] = {
+                "name": "gitea-pythonvcs-" + random_key()
+            }
+            response: Response = requests.post(f"{self.url}/users/{self.name}/tokens", auth=(self.name, password), data=data)
+            if response.status_code != 201:
+                raise GiteaAPIError(response, response.status_code)
+            else:
+                self.token: str = response.json()["sha1"]
+        else:
+            self.token = token
+        self.defaultheader: dict[str, str] = {
+            "accept": "application/json",
+            "Authorization": f'token {self.token}',
+        }
+        self.defaultparam: dict[str, str] = {"token": self.token}
+        self.user = GiteaUser(requests.get(f"{self.url}/user", headers=self.defaultheader))
+
+    def get_emails(self) -> list[GiteaEmail]:
+        """Get emails of token owner.
+
+        Returns:
+            list[GiteaEmail]: Emails of token owner.
+        """
+        emails = requests.get(f"{self.url}/user/emails", params=self.defaultparam).json()
+        return [GiteaEmail(i["email"], i["primary"], i["verified"]) for i in emails]
+
+    def add_emails(self, emails: list[str]) -> list[GiteaEmail]:
+        """Add emails to token owner.
+
+        Args:
+            emails (list[str]): Emails that will be added.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 201(success).
+
+        Returns:
+            list[GiteaEmail]: Emails that was added.
+        """
+        emailresponse = requests.post(f"{self.url}/user/emails", data={"emails": emails}, params=self.defaultparam)
+        if emailresponse.status_code != 201:
+            raise GiteaAPIError(emailresponse, emailresponse.status_code)
+        return [
+            GiteaEmail(i["email"], i["primary"], i["verified"])
+            for i in emailresponse.json()
+        ]
+
+    def remove_emails(self, emails: list[str]):
+        """Remove emails from token owner.
+
+        Args:
+            emails (list[str]): Emails that will be removed.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 204(success).
+        """
+        emailresponse = requests.delete(f"{self.url}/user/emails", json={"emails": emails}, params=self.defaultparam, headers=self.defaultheader)
+        if emailresponse.status_code != 204:
+            raise GiteaAPIError(emailresponse, emailresponse.status_code)
 
 def random_key() -> str:
     """Random key for secure random."""

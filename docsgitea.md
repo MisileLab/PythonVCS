@@ -14,8 +14,44 @@ Handler for gitea.
 
 ### Raises
 
-    ValueError: When dictionary is wrong. 
+    ValueError: When token and password is None or password is None and cleanup is True.
     GiteaAPIError: When gitea api status code does not 201(success).
+
+### Method get_emails
+
+Get emails of token owner.
+
+#### Return
+
+    list[GiteaEmail]: Emails of token owner.
+
+### Method add_emails
+
+Add emails to token owner.
+
+#### Arguments
+
+    emails (list[str]): Emails that will be added.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 201(success).
+
+#### Return
+
+    list[GiteaEmail]: Emails that was added.
+
+### Method remove_emails
+
+Remove emails from token owner.
+
+#### Arguments
+
+            emails (list[str]): Emails that will be removed.
+
+#### Raises
+
+            GiteaAPIError: When gitea api status code does not 204(success).
 
 ## Class GiteaAPIError: Exception
 
@@ -66,3 +102,13 @@ Random key for secure random.
 ### Return
 
     str: Return key encrypted with random value and sha3-512.
+
+## Class GiteaEmail
+
+Gitea email properties.
+
+### Arguments
+
+    email (str): Email address.
+    primary (bool): Is primary email.
+    verified (bool): Is verified email.
