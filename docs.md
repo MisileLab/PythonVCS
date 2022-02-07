@@ -1,3 +1,3 @@
 # VCSHandler docs
 
-[Gitea](/docsgitea.md)
+[Gitea](docs/docsgitea.md)

@@ -53,6 +53,50 @@ Remove emails from token owner.
 
     GiteaAPIError: When gitea api status code does not 204(success).
 
+### Method get_followers
+
+    Get followers of token owner.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 200(success).
+
+#### Return
+
+    list[GiteaUser] or None: Followers of token owner if has followers. else, return None.
+
+### Method get_followings
+
+    Get followings of token owner.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 200(success).
+
+#### Return
+
+    list[GiteaEmail] or None: Followings of token owner if has following users. else, return None.
+
+### Method follow_user
+
+    Follow user.
+
+#### Arguments
+
+    username (str): Username that will be follow.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 204(success).
+
+### Method unfollow_user
+
+    Unfollow user.
+
+#### Arguments
+
+    username (str): Username that will be unfollow.
+
 ## Class GiteaAPIError: Exception
 
 raised when api does not success.

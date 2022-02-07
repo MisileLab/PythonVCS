@@ -182,6 +182,66 @@ class GiteaHandler:
         if emailresponse.status_code != 204:
             raise GiteaAPIError(emailresponse, emailresponse.status_code)
 
+    def get_followers(self) -> list[GiteaUser] or None: # type: ignore
+        """Get followers of token owner.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            list[GiteaUser] or None: Followers of token owner if has followers. else, return None.
+        """
+        followersresponse = requests.get(f"{self.url}/user/followers", params=self.defaultparam)
+        if followersresponse.status_code != 200:
+            raise GiteaAPIError(followersresponse, followersresponse.status_code)
+        if followersresponse.json == []:
+            return None
+        else:
+            return [GiteaUser(followersresponse) for _ in followersresponse.json()]
+
+    def get_followings(self) -> list[GiteaUser] or None: # type: ignore
+        """Get following users of token owner.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            list[GiteaEmail] or None: Followings of token owner if has following users. else, return None.
+        """
+        followingsresponse = requests.get(f"{self.url}/user/following", params=self.defaultparam)
+        if followingsresponse.status_code != 200:
+            raise GiteaAPIError(followingsresponse, followingsresponse.status_code)
+        if followingsresponse.json == []:
+            return None
+        else:
+            return [GiteaUser(followingsresponse) for _ in followingsresponse.json()]
+
+    def follow_user(self, username: str):
+        """Follow user.
+
+        Args:
+            username (str): Username that will be follow.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 204(success).
+        """
+        followresponse = requests.put(f"{self.url}/user/following/{username}", params=self.defaultparam)
+        if followresponse.status_code != 204:
+            raise GiteaAPIError(followresponse, followresponse.status_code)
+
+    def unfollow_user(self, username: str):
+        """Unfollow user.
+
+        Args:
+            username (str): Username that will be unfollow.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 204(success).
+        """
+        response = requests.delete(f"{self.url}/user/following/{username}", params=self.defaultparam)
+        if response.status_code != 204:
+            raise GiteaAPIError(response, response.status_code)
+
 def random_key() -> str:
     """Random key for secure random."""
     return hashlib.sha3_512(str(SystemRandom().randint(1, 10000000)).encode('utf-8')).hexdigest()

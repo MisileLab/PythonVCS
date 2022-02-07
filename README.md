@@ -22,6 +22,10 @@ You can contribute this package, that's why this package is open source.
 4. This package requires mypy check. Please check type with mypy.
 5. Create pull request!
 
+## I found, Security Vulnerability, How can I report this bug?
+
+I'm using matrix for reporting. [Matrix DM](https://matrix.to/#/!lsbHGjyAnihBzrsckO:matrix.org?via=matrix.org)
+
 ## API Documentation
 
 [API Docs](/docs.md)
