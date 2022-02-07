@@ -42,37 +42,37 @@ class Visibility:
 
 class GiteaUser:
     """Class for find gitea user properties easily."""
-    def __init__(self, response: Response):
+    def __init__(self, jsondict: dict):
         """
         Dict to gitea user properties.
 
         Args:
-            response (Response): The /user response.
+            jsondict (dict) : The response json.
 
         Raises:
             WrongJSONError: When JSON is invaild.
         """
-        responsejson: dict = response.json()
-        self.active: bool = responsejson["active"]
-        if self.active is None:
-            raise WrongJSONError(responsejson)
-        self.avatar_url: str = responsejson["avatar_url"]
-        self.created_at: str = responsejson["created"]
-        self.email: str = responsejson["email"]
-        self.followers_count: int = responsejson["followers_count"]
-        self.following_count: int = responsejson["following_count"]
-        self.name: str = responsejson["full_name"]
-        self.id: int = responsejson["id"]
-        self.is_admin: bool = responsejson["is_admin"]
-        self.language: str = responsejson["language"]
-        self.last_login: str = responsejson["last_login"]
-        self.location: str = responsejson["location"]
-        self.username: str = responsejson["login"]
-        self.prohibit_login: bool = responsejson["prohibit_login"]
-        self.restricted: bool = responsejson["restricted"]
-        self.starred_count: int = responsejson["starred_repos_count"]
-        self.visibility: str = self.string_to_visibility(responsejson["visibility"])
-        self.website: str = responsejson["website"]
+        try:
+            self.active: bool = jsondict["active"]
+        except (TypeError, KeyError, ValueError):
+            raise WrongJSONError(jsondict)
+        self.avatar_url: str = jsondict["avatar_url"]
+        self.created_at: str = jsondict["created"]
+        self.email: str = jsondict["email"]
+        self.followers_count: int = jsondict["followers_count"]
+        self.following_count: int = jsondict["following_count"]
+        self.name: str = jsondict["full_name"]
+        self.id: int = jsondict["id"]
+        self.is_admin: bool = jsondict["is_admin"]
+        self.language: str = jsondict["language"]
+        self.last_login: str = jsondict["last_login"]
+        self.location: str = jsondict["location"]
+        self.username: str = jsondict["login"]
+        self.prohibit_login: bool = jsondict["prohibit_login"]
+        self.restricted: bool = jsondict["restricted"]
+        self.starred_count: int = jsondict["starred_repos_count"]
+        self.visibility: str = self.string_to_visibility(jsondict["visibility"])
+        self.website: str = jsondict["website"]
 
     @staticmethod
     def string_to_visibility(string: str) -> Visibility or None: # type: ignore
@@ -138,7 +138,7 @@ class GiteaHandler:
             "Authorization": f'token {self.token}',
         }
         self.defaultparam: dict[str, str] = {"token": self.token}
-        self.user = GiteaUser(requests.get(f"{self.url}/user", headers=self.defaultheader))
+        self.user = GiteaUser(requests.get(f"{self.url}/user", headers=self.defaultheader).json())
 
     def get_emails(self) -> list[GiteaEmail]:
         """Get emails of token owner.
@@ -182,7 +182,7 @@ class GiteaHandler:
         if emailresponse.status_code != 204:
             raise GiteaAPIError(emailresponse, emailresponse.status_code)
 
-    def get_followers(self) -> list[GiteaUser] or None: # type: ignore
+    def get_followers(self) -> list[GiteaUser] or None:    # type: ignore
         """Get followers of token owner.
 
         Raises:
@@ -197,7 +197,7 @@ class GiteaHandler:
         if followersresponse.json == []:
             return None
         else:
-            return [GiteaUser(followersresponse) for _ in followersresponse.json()]
+            return [GiteaUser(i) for i in followersresponse.json()]
 
     def get_followings(self) -> list[GiteaUser] or None: # type: ignore
         """Get following users of token owner.
@@ -214,7 +214,7 @@ class GiteaHandler:
         if followingsresponse.json == []:
             return None
         else:
-            return [GiteaUser(followingsresponse) for _ in followingsresponse.json()]
+            return [GiteaUser(i) for i in followingsresponse.json()]
 
     def follow_user(self, username: str):
         """Follow user.

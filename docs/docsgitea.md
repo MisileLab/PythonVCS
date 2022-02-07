@@ -111,7 +111,7 @@ Class for find gitea user properties easily.
 
 ### Arguments
 
-    response (Response): The /user response.
+    jsondict (jsondict): The /user response json.
 
 ### Raises
 
