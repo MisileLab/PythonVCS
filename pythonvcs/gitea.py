@@ -7,7 +7,19 @@ from requests import Response
 from secrets import SystemRandom
 import hashlib
 
-class GiteaEmail:
+class GPGKeyEmail:
+    def __init__(self, email: str, verified: bool):
+        """
+        GPG key email properties.
+
+        Args:
+            email (str): Email address.
+            verified (bool): Is verified email.
+        """
+        self.email: str = email
+        self.verified: bool = verified
+
+class GiteaEmail(GPGKeyEmail):
     def __init__(self, email: str, primary: bool, verified: bool):
         """
         Gitea email properties.
@@ -17,9 +29,8 @@ class GiteaEmail:
             primary (bool): Is primary email.
             verified (bool): Is verified email.
         """
-        self.email: str = email
+        super().__init__(email, verified)
         self.primary: bool = primary
-        self.verified: bool = verified
 
 class GiteaAPIError(Exception):
     """raised when api does not success."""
@@ -40,6 +51,39 @@ class Visibility:
     limited = "limited"
     private = "private"
 
+class GiteaGPGKey:
+    """GPGKey a user GPG key to sign commit and tag in repository"""
+    def __init__(self, jsondict: dict):
+        """Generate GPG Key properties from jsondict.
+
+        Args:
+            jsondict (dict): Gitea GPGKey json dict.
+
+        Raises:
+            WrongJSONError: When JSON does not have right key.
+        """
+        try:
+            self.certify: bool = jsondict["can_certify"]
+        except (KeyError, ValueError, TypeError) as e:
+            raise WrongJSONError(jsondict) from e
+        self.encrypt_comms: bool = jsondict["can_encrypt_comms"]
+        self.encrypt_storage: bool = jsondict["can_encrypt_storage"]
+        self.sign: bool = jsondict["can_sign"]
+        self.created_at: bool = jsondict["created_at"]
+        self.emails: list[GPGKeyEmail] = [
+            GPGKeyEmail(i["email"], i["verified"]) for i in jsondict["emails"]
+        ]
+        self.expired_at: str = jsondict["expired_at"]
+        self.id: int = jsondict["id"]
+        self.key_id: str = jsondict["key_id"]
+        self.primary_key_id: str = jsondict["primary_key_id"]
+        self.public_key: str = jsondict["public_key"]
+        self.verified: bool = jsondict["verified"]
+        super().__init__(jsondict)
+        self.subkey: list[GiteaGPGKey] or None = None
+        if jsondict["subkeys"] != "null":
+            self.subkey = [GiteaGPGKey(i) for i in jsondict["subkeys"]]
+
 class GiteaUser:
     """Class for find gitea user properties easily."""
     def __init__(self, jsondict: dict):
@@ -54,8 +98,8 @@ class GiteaUser:
         """
         try:
             self.active: bool = jsondict["active"]
-        except (TypeError, KeyError, ValueError):
-            raise WrongJSONError(jsondict)
+        except (TypeError, KeyError, ValueError) as e:
+            raise WrongJSONError(jsondict) from e
         self.avatar_url: str = jsondict["avatar_url"]
         self.created_at: str = jsondict["created"]
         self.email: str = jsondict["email"]
@@ -75,7 +119,7 @@ class GiteaUser:
         self.website: str = jsondict["website"]
 
     @staticmethod
-    def string_to_visibility(string: str) -> Visibility or None: # type: ignore
+    def string_to_visibility(string: str) -> Visibility or None:
         """Check visibility.
         Args:
             string (str): String that will be checked.
@@ -94,7 +138,7 @@ class GiteaUser:
 
 class GiteaHandler:
     """Handler for gitea."""
-    def __init__(self, name: str, password: str or None, url: str, token: str or None = None, cleanup: bool = True):    # type: ignore
+    def __init__(self, name: str, password: str or None, url: str, token: str or None = None, cleanup: bool = True):
         """
         Generate gitea handler.
 
@@ -182,7 +226,7 @@ class GiteaHandler:
         if emailresponse.status_code != 204:
             raise GiteaAPIError(emailresponse, emailresponse.status_code)
 
-    def get_followers(self) -> list[GiteaUser] or None:    # type: ignore
+    def get_followers(self) -> list[GiteaUser] or None:
         """Get followers of token owner.
 
         Raises:
@@ -199,7 +243,7 @@ class GiteaHandler:
         else:
             return [GiteaUser(i) for i in followersresponse.json()]
 
-    def get_followings(self) -> list[GiteaUser] or None: # type: ignore
+    def get_followings(self) -> list[GiteaUser] or None:
         """Get following users of token owner.
 
         Raises:
@@ -239,6 +283,87 @@ class GiteaHandler:
             GiteaAPIError: When gitea api status code does not 204(success).
         """
         response = requests.delete(f"{self.url}/user/following/{username}", params=self.defaultparam)
+        if response.status_code != 204:
+            raise GiteaAPIError(response, response.status_code)
+
+    def get_gpg_keys(self, page: int = None, limit: int = None) -> list[GiteaGPGKey] or None:
+        """Get gpg keys of token owner.
+
+        Args:
+            page (int, optional): page number of results to return (1-based). Defaults to None.
+            limit (int, optional): page size of results. Defaults to None.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            list[GiteaGPGKey] or None: GPG keys of token owner if has gpg keys. else, return None.
+        """
+        params = {"page": page, "limit": limit}
+        if page is None:
+            del params["page"]
+        if limit is None:
+            del params["limit"]
+        response = requests.get(f"{self.url}/user/gpg_keys", params=self.defaultparam | params)
+        if response.status_code != 200:
+            raise GiteaAPIError(response, response.status_code)
+        if response.json() == {}:
+            return None
+        else:
+            return [GiteaGPGKey(i) for i in response.json()]
+
+    def add_gpg_key(self, public_key: str, signature: str = None):
+        """Add gpg key to token owner.
+
+        Args:
+            public_key (str): Public key that will be added.
+            signature (str, optional): Signature of public key. Defaults to None.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 201(success).
+
+        Returns:
+            GiteaGPGKey: GPG key that was added.
+        """
+        dataparam = {"public_key": public_key, "signature": signature}
+        if signature is None:
+            del dataparam["signature"]
+        response = requests.post(
+            f"{self.url}/user/gpg_keys",
+            data=dataparam,
+            params=self.defaultparam,
+        )
+        if response.status_code != 201:
+            raise GiteaAPIError(response, response.status_code)
+        return GiteaGPGKey(response.json())
+
+    def get_gpg_key(self, id: int) -> GiteaGPGKey:
+        """Get gpg key of token owner.
+
+        Args:
+            id (int): ID of gpg key that will be get.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            GiteaGPGKey: GPG key that was get.
+        """
+        response = requests.get(f"{self.url}/user/gpg_keys/{id}", params=self.defaultparam)
+        if response.status_code != 200:
+            raise GiteaAPIError(response, response.status_code)
+        return GiteaGPGKey(response.json())
+
+    def delete_gpg_key(self, id: int):
+        """Delete gpg key of token owner.
+
+        Args:
+            id (int): ID of gpg key that will be delete.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 204(success).
+        """
+        response = requests.delete(f"{self.url}/user/gpg_keys/{id}", params=self.defaultparam)
         if response.status_code != 204:
             raise GiteaAPIError(response, response.status_code)
 
