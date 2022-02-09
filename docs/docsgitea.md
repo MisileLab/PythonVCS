@@ -80,6 +80,11 @@ Remove emails from token owner.
 
 Get followers of token owner.
 
+#### Arguments
+
+    page (int, optional): page number of results to return (1-based). Defaults to None.
+    limit (int, optional): page size of results. Defaults to None.
+
 #### Raises
 
     GiteaAPIError: When gitea api status code does not 200(success).
@@ -91,6 +96,11 @@ Get followers of token owner.
 ### Method get_followings
 
 Get followings of token owner.
+
+#### Arguments
+
+    page (int, optional): page number of results to return (1-based). Defaults to None.
+    limit (int, optional): page size of results. Defaults to None.
 
 #### Raises
 

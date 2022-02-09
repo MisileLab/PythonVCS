@@ -226,16 +226,21 @@ class GiteaHandler:
         if emailresponse.status_code != 204:
             raise GiteaAPIError(emailresponse, emailresponse.status_code)
 
-    def get_followers(self) -> list[GiteaUser] or None:
+    def get_followers(self, page: int = None, limit: int = None) -> list[GiteaUser] or None:
         """Get followers of token owner.
+
+        Args:
+            page (int, optional): page number of results to return (1-based). Defaults to None.
+            limit (int, optional): page size of results. Defaults to None.
 
         Raises:
             GiteaAPIError: When gitea api status code does not 200(success).
 
         Returns:
-            list[GiteaUser] or None: Followers of token owner if has followers. else, return None.
+            list[GiteaUser] or None: return followers of token owner if has followers. else return None.
         """
-        followersresponse = requests.get(f"{self.url}/user/followers", params=self.defaultparam)
+        params = self.__pagelimitdetect__(page, limit)
+        followersresponse = requests.get(f"{self.url}/user/followers", params=self.defaultparam | params )
         if followersresponse.status_code != 200:
             raise GiteaAPIError(followersresponse, followersresponse.status_code)
         if followersresponse.json == []:
@@ -243,22 +248,35 @@ class GiteaHandler:
         else:
             return [GiteaUser(i) for i in followersresponse.json()]
 
-    def get_followings(self) -> list[GiteaUser] or None:
+    def get_followings(self, page: int = None, limit: int = None) -> list[GiteaUser] or None:
         """Get following users of token owner.
+
+        Args:
+            page (int, optional): page number of results to return (1-based). Defaults to None.
+            limit (int, optional): page size of results. Defaults to None.
 
         Raises:
             GiteaAPIError: When gitea api status code does not 200(success).
 
         Returns:
-            list[GiteaEmail] or None: Followings of token owner if has following users. else, return None.
+            list[GiteaUser] or None: return followings of token owner if has following users. else return None.
         """
-        followingsresponse = requests.get(f"{self.url}/user/following", params=self.defaultparam)
+        params = self.__pagelimitdetect__(page, limit)
+        followingsresponse = requests.get(f"{self.url}/user/following", params=self.defaultparam | params)
         if followingsresponse.status_code != 200:
             raise GiteaAPIError(followingsresponse, followingsresponse.status_code)
         if followingsresponse.json == []:
             return None
         else:
             return [GiteaUser(i) for i in followingsresponse.json()]
+
+    def __pagelimitdetect__(self, page: int,limit: int):
+        params = {"page": page, "limit": limit}
+        if page is None:
+            del params["page"]
+        if limit is None:
+            del params["limit"]
+        return params
 
     def follow_user(self, username: str):
         """Follow user.
