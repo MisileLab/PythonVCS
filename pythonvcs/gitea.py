@@ -2,10 +2,35 @@
 Support gitea module.
 """
 
+from multiprocessing.sharedctypes import Value
 import requests
 from requests import Response
 from secrets import SystemRandom
 import hashlib
+
+class GiteaPublicKey:
+    """Gitea public key object."""
+    def __init__(self, responsejson: dict):
+        """Generate gitea public key.
+
+        Args:
+            responsejson (dict): Response json.
+
+        Raises:
+            WrongJSONError: If response json is not valid, raise this error.
+        """
+        try:
+            self.created_at: str = responsejson['created_at']
+        except (ValueError, KeyError, TypeError) as e:
+            raise WrongJSONError(responsejson) from e
+        self.fingerprint: str = responsejson['fingerprint']
+        self.public_key_id: int = responsejson['id']
+        self.key: str = responsejson['key']
+        self.key_type: str = responsejson['key_type']
+        self.read_only: bool = responsejson['read_only']
+        self.title: str = responsejson['title']
+        self.url: str = responsejson['url']
+        self.user = GiteaUser(responsejson['user'])
 
 class GPGKeyEmail:
     def __init__(self, email: str, verified: bool):
@@ -382,6 +407,82 @@ class GiteaHandler:
             GiteaAPIError: When gitea api status code does not 204(success).
         """
         response = requests.delete(f"{self.url}/user/gpg_keys/{id}", params=self.defaultparam)
+        if response.status_code != 204:
+            raise GiteaAPIError(response, response.status_code)
+
+    def get_public_keys(self, fingerprint: str = None, page: int = None, limit: int = None) -> list[GiteaPublicKey] or None:
+        """Get public keys of token owner.
+
+        Args:
+            fingerprint (str, optional): fingerprint of key. Defaults to None.
+            page (int, optional): page number of results to return (1-based). Defaults to None.
+            limit (int, optional): page size of results. Defaults to None.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            list[GiteaPublicKey] or None: return Public keys of token owner if has public keys. else, return None.
+        """
+        params = self.__pagelimitdetect__(page, limit)
+        if fingerprint is not None:
+            params["fingerprint"] = fingerprint
+        response = requests.get(f"{self.url}/user/keys", params=self.defaultparam | params)
+        if response.status_code != 200:
+            raise GiteaAPIError(response, response.status_code)
+        if response.json() == []:
+            return None
+        return [GiteaPublicKey(i) for i in response.json()]
+
+    def add_public_key(self, key: str, title: str, read_only: bool = None) -> GiteaPublicKey:
+        """Add public key to token owner.
+
+        Args:
+            key (str): Public key that will be added.
+            title (str): Title of public key.
+            read_only (bool, optional): Describe if the key has only read access or read/write. Defaults to None.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 201(success).
+
+        Returns:
+            GiteaPublicKey: Public key that was added.
+        """
+        params = {"key": key, "title": title}
+        if read_only is not None:
+            params["read_only"] = read_only
+        response = requests.post(f"{self.url}/user/keys", params=self.defaultparam | params)
+        if response.status_code != 201:
+            raise GiteaAPIError(response, response.status_code)
+        return GiteaPublicKey(response.json())
+
+    def get_public_key(self, id: int) -> GiteaPublicKey:
+        """Get public key of token owner.
+
+        Args:
+            id (int): ID of public key that will be get.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            GiteaPublicKey: Public key that was get.
+        """
+        response = requests.get(f"{self.url}/user/keys/{id}", params=self.defaultparam)
+        if response.status_code != 200:
+            raise GiteaAPIError(response, response.status_code)
+        return GiteaPublicKey(response.json())
+
+    def delete_public_key(self, id: int):
+        """Delete public key of token owner.
+
+        Args:
+            id (int): ID of public key that will be delete.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 204(success).
+        """
+        response = requests.delete(f"{self.url}/user/keys/{id}", params=self.defaultparam)
         if response.status_code != 204:
             raise GiteaAPIError(response, response.status_code)
 

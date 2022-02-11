@@ -12,11 +12,14 @@
     - [Method get_gpg_keys](#method-get_gpg_keys)
     - [Method add_gpg_key](#method-add_gpg_key)
     - [Method get_gpg_key](#method-get_gpg_key)
-    - [Method remove_gpg_key](#method-remove_gpg_key)
+    - [Method delete_gpg_key](#method-delete_gpg_key)
+    - [Method get_public_keys](#method-get_public_keys)
+    - [Method add_public_key](#method-add_public_key)
+    - [Method get_public_key](#method-get_public_key)
+    - [Method delete_public_key](#method-delete_public_key)
   - [Class GiteaAPIError: Exception](#class-giteaapierror-exception)
   - [Class WrongJSONError: Exception](#class-wrongjsonerror-exception)
   - [Class GiteaUser](#class-giteauser)
-    - [Static method string_to_visibility](#static-method-string_to_visibility)
   - [Class Visibility](#class-visibility)
   - [Method random_key](#method-random_key)
   - [Class GPGKeyEmail](#class-gpgkeyemail)
@@ -108,7 +111,7 @@ Get followings of token owner.
 
 #### Return
 
-    list[GiteaEmail] or None: Followings of token owner if has following users. else, return None.
+    list[GiteaUser] or None: Followings of token owner if has following users. else, return None.
 
 ### Method follow_user
 
@@ -180,13 +183,77 @@ Get gpg key of token owner.
 
     GiteaGPGKey: GPG key that was get.
 
-### Method remove_gpg_key
+### Method delete_gpg_key
 
 Delete gpg key of token owner.
 
 #### Arguments
 
     id (int): ID of gpg key that will be delete.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 204(success).
+
+### Method get_public_keys
+
+Get public keys of token owner.
+
+#### Arguments
+
+    fingerprint (str, optional): fingerprint of key. Defaults to None.
+    page (int, optional): page number of results to return (1-based). Defaults to None.
+    limit (int, optional): page size of results. Defaults to None.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 200(success).
+
+#### Returns
+
+    list[GiteaPublicKey] or None: return Public keys of token owner if has public keys. else, return None.
+
+### Method add_public_key
+
+Add public key to token owner.
+
+#### Arguments
+
+    key (str): Public key that will be added.
+    title (str): Title of public key.
+    read_only (bool, optional): Describe if the key has only read access or read/write. Defaults to None.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 201(success).
+
+#### Returns
+
+    GiteaPublicKey: Public key that was added.
+
+### Method get_public_key
+
+Get public key of token owner.
+
+#### Arguments
+
+    id (int): ID of public key that will be get.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 200(success).
+
+#### Returns
+
+    GiteaPublicKey: Public key that was get.
+
+### Method delete_public_key
+
+Delete public key of token owner.
+
+#### Arguments
+
+    id (int): ID of public key that will be delete.
 
 #### Raises
 
@@ -211,18 +278,6 @@ Class for find gitea user properties easily.
 ### Raises
 
     WrongJSONError: When JSON is invaild.
-
-### Static method string_to_visibility
-
-Check visibility property.
-
-#### Arguments
-
-    string (str): String that will be checked.
-
-#### Return
-
-    Visibility or None: if visibility is vaild, return visibility class. else, return None
 
 ## Class Visibility
 
