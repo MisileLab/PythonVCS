@@ -8,6 +8,55 @@ from requests import Response
 from secrets import SystemRandom
 import hashlib
 
+class GiteaTrustModel:
+    """Trust model for Gitea RepoOption"""    
+    default = "default",
+    collaborator = "collaborator",
+    committer = "committer",
+    collaboratorcomitter = "collaboratorcomitter"
+
+class GiteaExternalWiki:
+    """setting for external wiki"""
+    def __init__(self, external_url: str):
+        """Initalize Class
+
+        Args:
+            external_url (str): external wiki url
+        """
+        self.external_url = external_url
+
+class GiteaRepoOption:
+    """GiteaRepoOption for making gitea repository"""
+    def __init__(self, name: str, auto_init: bool = None, default_branch: str = None, description: str = None, gitignore: str = None,
+                    issue_labels: str = None, license_template: str = None, private: bool = None, readme: str = None, template: bool = None,
+                    trust_model: GiteaTrustModel = None):
+        """Initalize Class
+
+        Args:
+            name (str): Repository name
+            auto_init (bool, optional): Auto initliaze repository. Defaults to None.
+            default_branch (str, optional): Default branch name. Defaults to None.
+            description (str, optional): Repository description. Defaults to None.
+            gitignore (str, optional): Gitignore template. Defaults to None.
+            issue_labels (str, optional): Issue labels tamplate. Defaults to None.
+            license_template (str, optional): License template. Defaults to None.
+            private (bool, optional): Repository visibility. Defaults to None.
+            readme (str, optional): Readme description. Defaults to None.
+            template (bool, optional): What template to use. Defaults to None.
+            trust_model (GiteaTrustModel, optional): Trust model. Defaults to None.
+        """
+        self.name = name
+        self.auto_init = auto_init
+        self.default_branch = default_branch
+        self.description = description
+        self.gitignore = gitignore
+        self.issue_labels = issue_labels
+        self.license_template = license_template
+        self.private = private
+        self.readme = readme
+        self.template = template
+        self.trust_model = trust_model
+
 class GiteaPublicKey:
     """Gitea public key object."""
     def __init__(self, responsejson: dict):
@@ -161,6 +210,148 @@ class GiteaUser:
         else:
             return None
 
+class GiteaExtenalTracker:
+    """settings for external tracker"""
+    def __init__(self, external_tracker_format: str, external_tracker_style: str, external_tracker_url: str):
+        """Initalize Class
+
+        Args:
+            external_tracker_format (str): External Issue Tracker URL Format. Use the placeholders {user}, {repo} and {index} for the username, repository name and issue index.
+            external_tracker_style (str): External Issue Tracker Number Format, either numeric or alphanumeric
+            external_tracker_url (str): URL of external issue tracker.
+        """
+        self.external_tracker_format: str = external_tracker_format
+        self.external_tracker_style: str = external_tracker_style
+        self.external_tracker_url: str = external_tracker_url
+
+class GiteaRepository:
+    def __init__(self, response: dict):
+        self.allow_merge_commits: bool = response["allow_merge_commits"]
+        self.allow_rebase: bool = response["allow_rebase"]
+        self.allow_rebase_explicit: bool = response["allow_rebase_explicit"]
+        self.archived: bool = response["archived"]
+        self.avatar_url: str = response["avatar_url"]
+        self.clone_url: str = response["clone_url"]
+        self.created_at: str = response["created_at"]
+        self.default_branch: str = response["default_branch"]
+        self.default_merge_style: str = response["default_merge_style"]
+        self.description: str = response["description"]
+        self.empty: bool = response["empty"]
+        tempdata = response["external_tracker"]
+        self.external_tracker: GiteaExtenalTracker = GiteaExtenalTracker(tempdata["external_tracker_format"], tempdata["external_tracker_style"], tempdata["external_tracker_url"])
+        self.fork: bool = response["fork"]
+        self.forks_count: int = response["forks_count"]
+        self.full_name: str = response["full_name"]
+        self.has_issues: bool = response["has_issues"]
+        self.has_projects: bool = response["has_projects"]
+        self.has_pull_requests: bool = response["has_pull_requests"]
+        self.has_wiki: bool = response["has_wiki"]
+        self.html_url: str = response["html_url"]
+        self.id: int = response["id"]
+        self.ignore_whitespace_conflicts: bool = response["ignore_whitespace_conflicts"]
+        self.internal: bool = response["internal"]
+        
+        """
+        internal_tracker	InternalTracker{
+        description:	
+        InternalTracker represents settings for internal tracker
+
+        allow_only_contributors_to_track_time	boolean
+        Let only contributors track time (Built-in issue tracker)
+
+        enable_issue_dependencies	boolean
+        Enable dependencies for issues and pull requests (Built-in issue tracker)
+
+        enable_time_tracker	boolean
+        Enable time tracking (Built-in issue tracker)
+
+        }
+        mirror	boolean
+        mirror_interval	string
+        mirror_updated	string($date-time)
+        name	string
+        open_issues_count	integer($int64)
+        open_pr_counter	integer($int64)
+        original_url	string
+        owner	User{
+        description:	
+        User represents a user
+
+        active	boolean
+        Is user active
+
+        avatar_url	string
+        URL to the user's avatar
+
+        created	string($date-time)
+        description	string
+        the user's description
+
+        email	string($email)
+        followers_count	integer($int64)
+        user counts
+
+        following_count	integer($int64)
+        full_name	string
+        the user's full name
+
+        id	integer($int64)
+        the user's id
+
+        is_admin	boolean
+        Is the user an administrator
+
+        language	string
+        User locale
+
+        last_login	string($date-time)
+        location	string
+        the user's location
+
+        login	string
+        the user's username
+
+        prohibit_login	boolean
+        Is user login prohibited
+
+        restricted	boolean
+        Is user restricted
+
+        starred_repos_count	integer($int64)
+        visibility	string
+        User visibility level option: public, limited, private
+
+        website	string
+        the user's website
+
+        }
+        parent	{...}
+        permissions	Permission{
+        description:	
+        Permission represents a set of permissions
+
+        admin	boolean
+        pull	boolean
+        push	boolean
+        }
+        private	boolean
+        release_counter	integer($int64)
+        repo_transfer	RepoTransfer{
+        description:	
+        RepoTransfer represents a pending repo transfer
+
+        doer	User{...}
+        recipient	User{...}
+        teams	[...]
+        }
+        size	integer($int64)
+        ssh_url	string
+        stars_count	integer($int64)
+        template	boolean
+        updated_at	string($date-time)
+        watchers_count	integer($int64)
+        website	string"""
+
 class GiteaHandler:
     """Handler for gitea."""
     def __init__(self, name: str, password: str or None, url: str, token: str or None = None, cleanup: bool = True):
@@ -192,9 +383,7 @@ class GiteaHandler:
                     namea: str = i["name"]
                     if namea.startswith("gitea-pythonvcs-"):
                         requests.delete(f"{self.url}/users/{self.name}/tokens/{namea}", auth=(self.name, password))
-            data: dict[str, str] = {
-                "name": "gitea-pythonvcs-" + random_key()
-            }
+            data: dict[str, str] = {"name": f'gitea-pythonvcs-{random_key()}'}
             response: Response = requests.post(f"{self.url}/users/{self.name}/tokens", auth=(self.name, password), data=data)
             if response.status_code != 201:
                 raise GiteaAPIError(response, response.status_code)
@@ -485,6 +674,7 @@ class GiteaHandler:
         response = requests.delete(f"{self.url}/user/keys/{id}", params=self.defaultparam)
         if response.status_code != 204:
             raise GiteaAPIError(response, response.status_code)
+        
 
 def random_key() -> str:
     """Random key for secure random."""
