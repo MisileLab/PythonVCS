@@ -9,11 +9,85 @@ from secrets import SystemRandom
 import hashlib
 
 class GiteaTrustModel:
-    """Trust model for Gitea RepoOption"""    
+    """Trust model for GiteaRepoOption"""    
     default = "default",
     collaborator = "collaborator",
     committer = "committer",
     collaboratorcomitter = "collaboratorcomitter"
+
+class GiteaOrganization:
+    """Gitea Organization"""
+    def __init__(self, avatar_url: str, description: str, full_name: str, giteaid: int, location: str, repo_admin_change_team_access: bool, username: str, visibility: str, website: str):
+        """Initalize class
+
+        Args:
+            avatar_url (str): Avatar url of Organization
+            description (str): Description of Organization
+            full_name (str): Full name of Organization
+            giteaid (int): ID of Organization
+            location (str): Location of Organization
+            repo_admin_change_team_access (bool): Repo admin change team access value
+            username (str): Username of Organization
+            visibility (str): Visibility of Organization
+            website (str): Website of Organization
+        """
+        self.avatar_url = avatar_url
+        self.description = description
+        self.full_name = full_name
+        self.id = giteaid
+        self.location = location
+        self.repo_admin_change_team_access = repo_admin_change_team_access
+        self.username = username
+        self.visibility = visibility
+        self.website = website
+
+class GiteaTeams:
+    """a team in an organization"""
+    def __init__(self, can_create_repo: bool, description: str, teamid: int, include_all_repositories: bool, 
+                name: str, organization: GiteaOrganization, permission: str, repos_url: str, units: list, units_map: dict):
+        """Initalize class
+
+        Args:
+            can_create_repo (bool): Can create repository value
+            description (str): Description of team
+            teamid (int): ID of team
+            include_all_repositories (bool): Include all repositories value
+            name (str): Name of team
+            organization (GiteaOrganization): Organization of team
+            permission (str): Permission of team
+            repos_url (str): Repos url of team
+            units (list): Units of team
+            units_map (dict): Units dict of team
+
+        Raises:
+            ValueError: _description_
+        """
+        self.can_create_repo = can_create_repo
+        self.description = description
+        self.id = teamid
+        self.include_all_repositories = include_all_repositories
+        self.name = name
+        self.organization = organization
+        self.permission = permission
+        if self.permission not in ["none", "read", "write", "admin", "owner"]:
+            raise ValueError("Permission is wrong.")
+        self.repos_url = repos_url
+        self.units = units
+        self.units_map = units_map
+
+class GiteaPermission:
+    """Gitea Permissions"""
+    def __init__(self, admin: bool, push: bool, pull: bool):
+        """Initalize class
+
+        Args:
+            admin (bool): admin permission
+            push (bool): push permission
+            pull (bool): pull permission
+        """
+        self.admin = admin
+        self.push = push
+        self.pull = pull
 
 class GiteaExternalWiki:
     """setting for external wiki"""
@@ -24,6 +98,20 @@ class GiteaExternalWiki:
             external_url (str): external wiki url
         """
         self.external_url = external_url
+
+class GiteaInternalTracker:
+    """InternalTracker represents settings for internal tracker"""
+    def __init__(self, allow_only_contributors_to_track_time: bool, enable_issue_dependencies: bool, enable_time_tracker: bool):
+        """Initalize Class
+
+        Args:
+            allow_only_contributors_to_track_time (bool): Let only contributors track time (Built-in issue tracker)
+            enable_issue_dependencies (bool): Enable dependencies for issues and pull requests (Built-in issue tracker)
+            enable_time_tracker (bool): Enable time tracking (Built-in issue tracker)
+        """
+        self.allow_only_contributors_to_track_time = allow_only_contributors_to_track_time
+        self.enable_issue_dependencies = enable_issue_dependencies
+        self.enable_time_tracker = enable_time_tracker
 
 class GiteaRepoOption:
     """GiteaRepoOption for making gitea repository"""
@@ -210,6 +298,26 @@ class GiteaUser:
         else:
             return None
 
+class GiteaRepoTransfer:
+    """A pending repo transfer."""
+    def __init__(self, doer: GiteaUser, recipient: GiteaUser, teams: list[str]):
+        """Initalize class
+
+        Args:
+            doer (GiteaUser): The user who initiated the transfer.
+            recipient (GiteaUser): The user who will receive the transfer.
+            teams (list[str]): The teams that will be transferred.
+        """
+        self.doer = doer
+        self.recipient = recipient
+        self.teams: list[GiteaTeams] = []
+        for i in teams:
+            tempdata = i["organization"]
+            organization = GiteaOrganization(tempdata["avatar_url"], tempdata["description"], tempdata["full_name"], tempdata["id"], tempdata["location"], tempdata["repo_admin_change_team_access"],
+                                            tempdata["username"], tempdata["visibility"], tempdata["website"])
+            self.teams.append(GiteaTeams(i["can_create_repo"], i["description"], i["id"], i["include_all_repositories"], i["name"], organization, i["permission"], i["repo_url"], i["units"], i["units_map"]))
+
+
 class GiteaExtenalTracker:
     """settings for external tracker"""
     def __init__(self, external_tracker_format: str, external_tracker_style: str, external_tracker_url: str):
@@ -225,7 +333,13 @@ class GiteaExtenalTracker:
         self.external_tracker_url: str = external_tracker_url
 
 class GiteaRepository:
+    """Repository properties."""
     def __init__(self, response: dict):
+        """Initalize class
+
+        Args:
+            response (dict): The response json.
+        """        
         self.allow_merge_commits: bool = response["allow_merge_commits"]
         self.allow_rebase: bool = response["allow_rebase"]
         self.allow_rebase_explicit: bool = response["allow_rebase_explicit"]
@@ -237,8 +351,12 @@ class GiteaRepository:
         self.default_merge_style: str = response["default_merge_style"]
         self.description: str = response["description"]
         self.empty: bool = response["empty"]
-        tempdata = response["external_tracker"]
-        self.external_tracker: GiteaExtenalTracker = GiteaExtenalTracker(tempdata["external_tracker_format"], tempdata["external_tracker_style"], tempdata["external_tracker_url"])
+        try:
+            tempdata = response["external_tracker"]
+        except KeyError:
+            self.external_tracker = None
+        else: 
+            self.external_tracker: GiteaExtenalTracker = GiteaExtenalTracker(tempdata["external_tracker_format"], tempdata["external_tracker_style"], tempdata["external_tracker_url"])
         self.fork: bool = response["fork"]
         self.forks_count: int = response["forks_count"]
         self.full_name: str = response["full_name"]
@@ -250,107 +368,32 @@ class GiteaRepository:
         self.id: int = response["id"]
         self.ignore_whitespace_conflicts: bool = response["ignore_whitespace_conflicts"]
         self.internal: bool = response["internal"]
-        
-        """
-        internal_tracker	InternalTracker{
-        description:	
-        InternalTracker represents settings for internal tracker
-
-        allow_only_contributors_to_track_time	boolean
-        Let only contributors track time (Built-in issue tracker)
-
-        enable_issue_dependencies	boolean
-        Enable dependencies for issues and pull requests (Built-in issue tracker)
-
-        enable_time_tracker	boolean
-        Enable time tracking (Built-in issue tracker)
-
-        }
-        mirror	boolean
-        mirror_interval	string
-        mirror_updated	string($date-time)
-        name	string
-        open_issues_count	integer($int64)
-        open_pr_counter	integer($int64)
-        original_url	string
-        owner	User{
-        description:	
-        User represents a user
-
-        active	boolean
-        Is user active
-
-        avatar_url	string
-        URL to the user's avatar
-
-        created	string($date-time)
-        description	string
-        the user's description
-
-        email	string($email)
-        followers_count	integer($int64)
-        user counts
-
-        following_count	integer($int64)
-        full_name	string
-        the user's full name
-
-        id	integer($int64)
-        the user's id
-
-        is_admin	boolean
-        Is the user an administrator
-
-        language	string
-        User locale
-
-        last_login	string($date-time)
-        location	string
-        the user's location
-
-        login	string
-        the user's username
-
-        prohibit_login	boolean
-        Is user login prohibited
-
-        restricted	boolean
-        Is user restricted
-
-        starred_repos_count	integer($int64)
-        visibility	string
-        User visibility level option: public, limited, private
-
-        website	string
-        the user's website
-
-        }
-        parent	{...}
-        permissions	Permission{
-        description:	
-        Permission represents a set of permissions
-
-        admin	boolean
-        pull	boolean
-        push	boolean
-        }
-        private	boolean
-        release_counter	integer($int64)
-        repo_transfer	RepoTransfer{
-        description:	
-        RepoTransfer represents a pending repo transfer
-
-        doer	User{...}
-        recipient	User{...}
-        teams	[...]
-        }
-        size	integer($int64)
-        ssh_url	string
-        stars_count	integer($int64)
-        template	boolean
-        updated_at	string($date-time)
-        watchers_count	integer($int64)
-        website	string"""
+        tempdata = response["internal_tracker"]
+        self.internal_tracker: GiteaInternalTracker = GiteaInternalTracker(tempdata["allow_only_contributors_to_track_time"], tempdata["enable_issue_dependencies"], tempdata["enable_time_tracker"])
+        self.mirror: bool = response["mirror"]
+        self.mirror_interval: str = response["mirror_interval"]
+        self.mirror_updated: str = response["mirror_updated"]
+        self.name: str = response["name"]
+        self.open_issues_count: str = response["open_issues_count"]
+        self.open_pr_counter: int = response["open_pr_counter"]
+        self.original_url: str = response["original_url"]
+        self.owner: GiteaUser = GiteaUser(response["owner"])
+        self.parent: str = response["parent"]
+        tempdata = response["permissions"]
+        self.permissions: GiteaPermission = GiteaPermission(tempdata["admin"], tempdata["push"], tempdata["pull"])
+        self.private: bool = response["private"]
+        self.release_counter: int = response["release_counter"]
+        tempdata = response["repo_transfer"]
+        try:
+            self.repo_transfer: GiteaRepoTransfer = GiteaRepoTransfer(GiteaUser(tempdata["doer"]), GiteaUser(tempdata["recipient"]), tempdata["teams"])
+        except TypeError:
+            self.repo_transfer = None
+        self.size: int = response["size"]
+        self.ssh_url: str = response["ssh_url"]
+        self.stars: int = response["stars_count"]
+        self.template: bool = response["template"]
+        self.updated_at: str = response["updated_at"]
+        self.watchers_count: int = response["watchers_count"]
 
 class GiteaHandler:
     """Handler for gitea."""
@@ -674,7 +717,20 @@ class GiteaHandler:
         response = requests.delete(f"{self.url}/user/keys/{id}", params=self.defaultparam)
         if response.status_code != 204:
             raise GiteaAPIError(response, response.status_code)
-        
+
+    def get_repository(self) -> GiteaRepository:
+        """Get repository of token owner.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            GiteaRepository: Repository that was get.
+        """
+        response = requests.get(f"{self.url}/user/repos", params=self.defaultparam)
+        if response.status_code != 200:
+            raise GiteaAPIError(response, response.status_code)
+        return [GiteaRepository(i) for i in response.json()]
 
 def random_key() -> str:
     """Random key for secure random."""
