@@ -376,7 +376,9 @@ class GiteaRepository:
         self.name: str = response["name"]
         self.open_issues_count: str = response["open_issues_count"]
         self.open_pr_counter: int = response["open_pr_counter"]
-        self.original_url: str = response["original_url"]
+        self.url: str = response["original_url"]
+        if not self.url:
+            self.url = response["html_url"]
         self.owner: GiteaUser = GiteaUser(response["owner"])
         self.parent: str = response["parent"]
         tempdata = response["permissions"]
@@ -718,19 +720,29 @@ class GiteaHandler:
         if response.status_code != 204:
             raise GiteaAPIError(response, response.status_code)
 
-    def get_repository(self) -> GiteaRepository:
-        """Get repository of token owner.
+    def get_repositories(self) -> list[GiteaRepository]:
+        """Get repositories of token owner.
 
         Raises:
             GiteaAPIError: When gitea api status code does not 200(success).
 
         Returns:
-            GiteaRepository: Repository that was get.
+            list[GiteaRepository]: Repositories that was get.
         """
         response = requests.get(f"{self.url}/user/repos", params=self.defaultparam)
         if response.status_code != 200:
             raise GiteaAPIError(response, response.status_code)
         return [GiteaRepository(i) for i in response.json()]
+
+    def create_repository(self, option: GiteaRepoOption) -> GiteaRepository:
+        options = option.__dict__
+        for i, i2 in enumerate(options):
+            if i2 is None:
+                del options[i]
+        response = requests.post(f"{self.url}/user/repos", data=options, params=self.defaultparam)
+        if response.status_code != 201:
+            raise GiteaAPIError(response, response.status_code)
+        return GiteaRepository(response.json())
 
 def random_key() -> str:
     """Random key for secure random."""
