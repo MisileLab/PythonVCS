@@ -735,6 +735,17 @@ class GiteaHandler:
         return [GiteaRepository(i) for i in response.json()]
 
     def create_repository(self, option: GiteaRepoOption) -> GiteaRepository:
+        """Create repository of token owner.
+
+        Args:
+            option (GiteaRepoOption): Repository option that will be created.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 201(success).
+
+        Returns:
+            GiteaRepository: Repository that was created.
+        """
         options = option.__dict__
         for i, i2 in enumerate(options):
             if i2 is None:
