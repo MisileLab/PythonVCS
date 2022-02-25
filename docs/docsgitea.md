@@ -19,7 +19,6 @@
     - [Method delete_public_key](#method-delete_public_key)
     - [Method get_repos](#method-get_repos)
     - [Method create_repository](#method-create_repository)
-    - [Args](#args)
   - [Class GiteaAPIError: Exception](#class-giteaapierror-exception)
   - [Class WrongJSONError: Exception](#class-wrongjsonerror-exception)
   - [Class GiteaUser](#class-giteauser)
@@ -278,7 +277,7 @@ Delete public key of token owner.
 
     Create repository of token owner.
 
-### Args
+### Arguments
 
     option (GiteaRepoOption): Repository option that will be created.
 
