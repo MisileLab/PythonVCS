@@ -16,7 +16,7 @@ class GiteaTrustModel:
     collaboratorcomitter = "collaboratorcomitter"
 
 class GiteaOrganization:
-    """Gitea Organization"""
+    """Gitea organization properties."""
     def __init__(self, avatar_url: str, description: str, full_name: str, giteaid: int, location: str, repo_admin_change_team_access: bool, username: str, visibility: str, website: str):
         """Initalize class
 
@@ -42,7 +42,7 @@ class GiteaOrganization:
         self.website = website
 
 class GiteaTeams:
-    """a team in an organization"""
+    """A team in an organization"""
     def __init__(self, can_create_repo: bool, description: str, teamid: int, include_all_repositories: bool, 
                 name: str, organization: GiteaOrganization, permission: str, repos_url: str, units: list, units_map: dict):
         """Initalize class
@@ -60,7 +60,7 @@ class GiteaTeams:
             units_map (dict): Units dict of team
 
         Raises:
-            ValueError: _description_
+            ValueError: If permission value is wrong.
         """
         self.can_create_repo = can_create_repo
         self.description = description
@@ -76,7 +76,7 @@ class GiteaTeams:
         self.units_map = units_map
 
 class GiteaPermission:
-    """Gitea Permissions"""
+    """Gitea permissions properties."""
     def __init__(self, admin: bool, push: bool, pull: bool):
         """Initalize class
 
@@ -100,7 +100,7 @@ class GiteaExternalWiki:
         self.external_url = external_url
 
 class GiteaInternalTracker:
-    """InternalTracker represents settings for internal tracker"""
+    """Gitea internal tracker settings properties."""
     def __init__(self, allow_only_contributors_to_track_time: bool, enable_issue_dependencies: bool, enable_time_tracker: bool):
         """Initalize Class
 
@@ -144,6 +144,32 @@ class GiteaRepoOption:
         self.readme = readme
         self.template = template
         self.trust_model = trust_model
+
+class GiteaSettings:
+    """Gitea settings properties."""
+    def __init__(self, description: str, diff_view_style: str, full_name: str, hide_activity: bool, hide_email: bool, language: str, location: str, theme: str, website: str):
+        """Initalize class
+
+        Args:
+            description (str): Description of user
+            diff_view_style (str): Diff view style of user
+            full_name (str): Full name of user
+            hide_activity (bool): Hide activity value of user
+            hide_email (bool): Hide email value of user
+            language (str): Language of user
+            location (str): Location of user
+            theme (str): Theme of user
+            website (str): Website of user
+        """        
+        self.description = description
+        self.diff_view_style = diff_view_style
+        self.full_name = full_name
+        self.hide_activity = hide_activity
+        self.hide_email = hide_email
+        self.language = language
+        self.location = location
+        self.theme = theme
+        self.website = website
 
 class GiteaPublicKey:
     """Gitea public key object."""
@@ -319,9 +345,9 @@ class GiteaRepoTransfer:
 
 
 class GiteaExtenalTracker:
-    """settings for external tracker"""
+    """Gitea settings for external tracker"""
     def __init__(self, external_tracker_format: str, external_tracker_style: str, external_tracker_url: str):
-        """Initalize Class
+        """Initalize class
 
         Args:
             external_tracker_format (str): External Issue Tracker URL Format. Use the placeholders {user}, {repo} and {index} for the username, repository name and issue index.
@@ -333,7 +359,7 @@ class GiteaExtenalTracker:
         self.external_tracker_url: str = external_tracker_url
 
 class GiteaRepository:
-    """Repository properties."""
+    """Gitea repository properties."""
     def __init__(self, response: dict):
         """Initalize class
 
@@ -353,7 +379,7 @@ class GiteaRepository:
         self.empty: bool = response["empty"]
         try:
             tempdata = response["external_tracker"]
-        except KeyError:
+        except (TypeError, KeyError):
             self.external_tracker = None
         else: 
             self.external_tracker: GiteaExtenalTracker = GiteaExtenalTracker(tempdata["external_tracker_format"], tempdata["external_tracker_style"], tempdata["external_tracker_url"])
@@ -388,7 +414,7 @@ class GiteaRepository:
         tempdata = response["repo_transfer"]
         try:
             self.repo_transfer: GiteaRepoTransfer = GiteaRepoTransfer(GiteaUser(tempdata["doer"]), GiteaUser(tempdata["recipient"]), tempdata["teams"])
-        except TypeError:
+        except (TypeError, KeyError):
             self.repo_transfer = None
         self.size: int = response["size"]
         self.ssh_url: str = response["ssh_url"]
@@ -754,6 +780,66 @@ class GiteaHandler:
         if response.status_code != 201:
             raise GiteaAPIError(response, response.status_code)
         return GiteaRepository(response.json())
+
+    def get_settings(self) -> GiteaSettings:
+        """Get settings of token owner.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            GiteaSettings: Settings that was get.
+        """        
+        response = requests.get(f"{self.url}/user/settings", params=self.defaultparam)
+        if response.status_code != 200:
+            raise GiteaAPIError(response, response.status_code)
+        return self.__response_to_settings__(response.json())
+
+    def change_settings(self, new_settings: GiteaSettings) -> GiteaSettings:
+        """Change settings of token owner.
+
+        Args:
+            new_settings (GiteaSettings): New settings that will be changed.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            GiteaSettings: Settings that was changed.
+        """
+        response = requests.patch(f"{self.url}/user/settings", params=self.defaultparam, data=new_settings.__dict__)
+        if response.status_code != 200:
+            raise GiteaAPIError(response, response.status_code)
+        return self.__response_to_settings__(response.json())
+
+    def change_setting(self, new_setting_name: str, new_setting_value: bool or str) -> GiteaSettings:
+        """Change setting of token owner.
+
+        Args:
+            new_setting_name (str): Name of setting that will be changed.
+            new_setting_value (boolorstr): Value of setting that will be changed.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            GiteaSettings: Settings that was changed.
+        """
+        setting = self.get_settings()
+        setting.__setattr__(new_setting_name, new_setting_value)
+        return self.change_settings(setting)
+
+    def __response_to_settings__(self, response: dict) -> GiteaSettings:
+        """Convert response to settings.
+
+        Args:
+            response (dict): Response that will be converted.
+
+        Returns:
+            GiteaSettings: Settings that was converted.
+        """
+        return GiteaSettings(response["description"], response["diff_view_style"], response["full_name"], response["hide_activity"], response["hide_email"], response["language"], response["location"],
+                    response["theme"], response["website"])
 
 def random_key() -> str:
     """Random key for secure random."""
