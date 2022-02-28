@@ -22,6 +22,9 @@
     - [Method get_settings](#method-get_settings)
     - [Method change_settings](#method-change_settings)
     - [Method change_setting](#method-change_setting)
+    - [Method get_starred_repositories](#method-get_starred_repositories)
+    - [Method star_repository](#method-star_repository)
+    - [Method unstar_repository](#method-unstar_repository)
   - [Class GiteaAPIError: Exception](#class-giteaapierror-exception)
   - [Class WrongJSONError: Exception](#class-wrongjsonerror-exception)
   - [Class GiteaUser](#class-giteauser)
@@ -335,7 +338,7 @@ Change setting of token owner.
 #### Arguments
 
     new_setting_name (str): Name of setting that will be changed.
-    new_setting_value (boolorstr): Value of setting that will be changed.
+    new_setting_value (bool or str): Value of setting that will be changed.
 
 #### Raises
 
@@ -344,6 +347,44 @@ Change setting of token owner.
 #### Returns
 
     GiteaSettings: Settings that was changed.
+
+### Method get_starred_repositories
+
+    Get starred repositories of token owner.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 200(success).
+
+#### Returns
+
+    list[GiteaRepository] or list: Starred repositories that was get.
+
+### Method star_repository
+
+    Star repository.
+
+#### Arguments
+
+    owner (str): Owner of repository that will be starred.
+    repo (str): Repository that will be starred.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 204(success).
+
+### Method unstar_repository
+
+    Unstar repository.
+
+#### Arguments
+
+    owner (str): Owner of repository that will be unstarred.
+    repo (str): Repository that will be unstarred.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 204(success).
 
 ## Class GiteaAPIError: Exception
 

@@ -817,7 +817,7 @@ class GiteaHandler:
 
         Args:
             new_setting_name (str): Name of setting that will be changed.
-            new_setting_value (boolorstr): Value of setting that will be changed.
+            new_setting_value (bool or str): Value of setting that will be changed.
 
         Raises:
             GiteaAPIError: When gitea api status code does not 200(success).
@@ -828,6 +828,51 @@ class GiteaHandler:
         setting = self.get_settings()
         setting.__setattr__(new_setting_name, new_setting_value)
         return self.change_settings(setting)
+
+    def get_starred_repositories(self) -> list[GiteaRepository] or list:
+        """Get starred repositories of token owner.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            list[GiteaRepository] or list: Starred repositories that was get.
+        """        
+        response = requests.get(f"{self.url}/user/starred", params=self.defaultparam)
+        if response.status_code != 200:
+            raise GiteaAPIError(response, response.status_code)
+        if response.json() == []:
+            return []
+        else:
+            return [GiteaRepository(i) for i in response.json()]
+
+    def star_repository(self, owner: str, repo: str):
+        """Star repository.
+
+        Args:
+            owner (str): Owner of repository that will be starred.
+            repo (str): Repository that will be starred.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 204(success).
+        """
+        response = requests.put(f"{self.url}/user/starred/{owner}/{repo}", params=self.defaultparam)
+        if response.status_code != 204:
+            raise GiteaAPIError(response, response.status_code)
+
+    def unstar_repository(self, owner: str, repo: str):
+        """Unstar repository.
+
+        Args:
+            owner (str): Owner of repository that will be unstarred.
+            repo (str): Repository that will be unstarred.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 204(success).
+        """        
+        response = requests.delete(f"{self.url}/user/starred/{owner}/{repo}", params=self.defaultparam)
+        if response.status_code != 204:
+            raise GiteaAPIError(response, response.status_code)
 
     def __response_to_settings__(self, response: dict) -> GiteaSettings:
         """Convert response to settings.
