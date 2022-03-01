@@ -15,6 +15,17 @@ class GiteaTrustModel:
     committer = "committer",
     collaboratorcomitter = "collaboratorcomitter"
 
+class GiteaStopWatch:
+    """Running stop watch for gitea."""
+    def __init__(self, created: str, duration: str, issue_index: int, issue_title: str, repo_name: str, repo_owner_name: str, seconds: int):
+        self.created = created
+        self.duration = duration
+        self.issue_index = issue_index
+        self.issue_title = issue_title
+        self.repo_name = repo_name
+        self.repo_owner_name = repo_owner_name
+        self.seconds = seconds
+
 class GiteaOrganization:
     """Gitea organization properties."""
     def __init__(self, avatar_url: str, description: str, full_name: str, giteaid: int, location: str, repo_admin_change_team_access: bool, username: str, visibility: str, website: str):
@@ -873,6 +884,33 @@ class GiteaHandler:
         response = requests.delete(f"{self.url}/user/starred/{owner}/{repo}", params=self.defaultparam)
         if response.status_code != 204:
             raise GiteaAPIError(response, response.status_code)
+
+    def get_stopwatches(self) -> list[GiteaStopWatch] or None:
+        """Get stopwatches of token owner.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            list[GiteaStopWatch] or None: Stopwatches that was get, If there is no stopwatch, return None.
+        """        
+        response = requests.get(f"{self.url}/user/stopwatches", params=self.defaultparam)
+        if response.status_code != 200:
+            raise GiteaAPIError(response, response.status_code)
+        if response.json() == []:
+            return None
+        return [
+            GiteaStopWatch(
+                i["created"],
+                i["duration"],
+                i["issue_index"],
+                i["issue_title"],
+                i["repo_name"],
+                i["repo_owner_name"],
+                i["seconds"],
+            )
+            for i in response.json()
+        ]
 
     def __response_to_settings__(self, response: dict) -> GiteaSettings:
         """Convert response to settings.

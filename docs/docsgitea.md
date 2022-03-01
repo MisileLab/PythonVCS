@@ -25,6 +25,7 @@
     - [Method get_starred_repositories](#method-get_starred_repositories)
     - [Method star_repository](#method-star_repository)
     - [Method unstar_repository](#method-unstar_repository)
+    - [Method get_stopwatches](#method-get_stopwatches)
   - [Class GiteaAPIError: Exception](#class-giteaapierror-exception)
   - [Class WrongJSONError: Exception](#class-wrongjsonerror-exception)
   - [Class GiteaUser](#class-giteauser)
@@ -41,6 +42,7 @@
   - [Class GiteaRepoTransfer](#class-gitearepotransfer)
   - [Class GiteaTeams](#class-giteateams)
   - [Class GiteaOrganization](#class-giteaorganization)
+  - [Class GiteaStopWatch](#class-giteastopwatch)
 
 ## Class GiteaHandler
 
@@ -386,6 +388,18 @@ Change setting of token owner.
 
     GiteaAPIError: When gitea api status code does not 204(success).
 
+### Method get_stopwatches
+
+    Get stopwatches of token owner.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 200(success).
+
+#### Returns
+
+    list[GiteaStopWatch] or None: Stopwatches that was get, If there is no stopwatch, return None.
+
 ## Class GiteaAPIError: Exception
 
 raised when api does not success.
@@ -551,3 +565,7 @@ GPGKey a user GPG key to sign commit and tag in repository.
     username (str): Username of Organization
     visibility (str): Visibility of Organization
     website (str): Website of Organization
+
+## Class GiteaStopWatch
+
+    Running stop watch for gitea.
