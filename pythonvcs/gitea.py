@@ -2,11 +2,20 @@
 Support gitea module.
 """
 
-from multiprocessing.sharedctypes import Value
+warning = """not tested about this feature yet, maybe some person can test."""
+
 import requests
 from requests import Response
 from secrets import SystemRandom
 import hashlib
+
+def not_tested_warning(func):
+
+    def wrapper_func():
+        warning = f"not tested about {func.__name__} yet, maybe some person can test, then pull request to this repository, please."
+        print(warning)
+
+    return wrapper_func
 
 class GiteaTrustModel:
     """Trust model for GiteaRepoOption"""    
@@ -626,6 +635,7 @@ class GiteaHandler:
         else:
             return [GiteaGPGKey(i) for i in response.json()]
 
+    @not_tested_warning
     def add_gpg_key(self, public_key: str, signature: str = None):
         """Add gpg key to token owner.
 
@@ -668,6 +678,7 @@ class GiteaHandler:
             raise GiteaAPIError(response, response.status_code)
         return GiteaGPGKey(response.json())
 
+    @not_tested_warning
     def delete_gpg_key(self, id: int):
         """Delete gpg key of token owner.
 
@@ -681,6 +692,7 @@ class GiteaHandler:
         if response.status_code != 204:
             raise GiteaAPIError(response, response.status_code)
 
+    @not_tested_warning
     def get_public_keys(self, fingerprint: str = None, page: int = None, limit: int = None) -> list[GiteaPublicKey] or None:
         """Get public keys of token owner.
 
@@ -705,6 +717,7 @@ class GiteaHandler:
             return None
         return [GiteaPublicKey(i) for i in response.json()]
 
+    @not_tested_warning
     def add_public_key(self, key: str, title: str, read_only: bool = None) -> GiteaPublicKey:
         """Add public key to token owner.
 
@@ -727,6 +740,7 @@ class GiteaHandler:
             raise GiteaAPIError(response, response.status_code)
         return GiteaPublicKey(response.json())
 
+    @not_tested_warning
     def get_public_key(self, id: int) -> GiteaPublicKey:
         """Get public key of token owner.
 
@@ -744,6 +758,7 @@ class GiteaHandler:
             raise GiteaAPIError(response, response.status_code)
         return GiteaPublicKey(response.json())
 
+    @not_tested_warning
     def delete_public_key(self, id: int):
         """Delete public key of token owner.
 
@@ -757,8 +772,12 @@ class GiteaHandler:
         if response.status_code != 204:
             raise GiteaAPIError(response, response.status_code)
 
-    def get_repositories(self) -> list[GiteaRepository]:
+    def get_repositories(self, page: int = None, limit: int = None) -> list[GiteaRepository]:    
         """Get repositories of token owner.
+
+        Args:
+            page (int, optional): page number of results to return. (1-based) Defaults to None.
+            limit (int, optional): page size of results. Defaults to None.
 
         Raises:
             GiteaAPIError: When gitea api status code does not 200(success).
@@ -766,7 +785,7 @@ class GiteaHandler:
         Returns:
             list[GiteaRepository]: Repositories that was get.
         """
-        response = requests.get(f"{self.url}/user/repos", params=self.defaultparam)
+        response = requests.get(f"{self.url}/user/repos", params=self.defaultparam | self.__pagelimitdetect__(page, limit))
         if response.status_code != 200:
             raise GiteaAPIError(response, response.status_code)
         return [GiteaRepository(i) for i in response.json()]
@@ -818,7 +837,10 @@ class GiteaHandler:
         Returns:
             GiteaSettings: Settings that was changed.
         """
-        response = requests.patch(f"{self.url}/user/settings", params=self.defaultparam, data=new_settings.__dict__)
+        dicts = new_settings.__dict__
+        if getattr(dicts, "website", "") == "":
+            del dicts["website"]
+        response = requests.patch(f"{self.url}/user/settings", params=self.defaultparam, json=dicts)
         if response.status_code != 200:
             raise GiteaAPIError(response, response.status_code)
         return self.__response_to_settings__(response.json())
@@ -840,16 +862,22 @@ class GiteaHandler:
         setting.__setattr__(new_setting_name, new_setting_value)
         return self.change_settings(setting)
 
-    def get_starred_repositories(self) -> list[GiteaRepository] or list:
+    """not tested yet after this repository."""
+
+    def get_starred_repositories(self, page: int = None, limit: int = None) -> list[GiteaRepository] or list:
         """Get starred repositories of token owner.
+
+        Args:
+            page (int, optional): page number of results to return. (1-based) Defaults to None.
+            limit (int, optional): page size of results. Defaults to None.
 
         Raises:
             GiteaAPIError: When gitea api status code does not 200(success).
 
         Returns:
             list[GiteaRepository] or list: Starred repositories that was get.
-        """        
-        response = requests.get(f"{self.url}/user/starred", params=self.defaultparam)
+        """
+        response = requests.get(f"{self.url}/user/starred", params=self.defaultparam | self.__pagelimitdetect__(page, limit))
         if response.status_code != 200:
             raise GiteaAPIError(response, response.status_code)
         if response.json() == []:
@@ -885,8 +913,12 @@ class GiteaHandler:
         if response.status_code != 204:
             raise GiteaAPIError(response, response.status_code)
 
-    def get_stopwatches(self) -> list[GiteaStopWatch] or None:
+    def get_stopwatches(self, page: int = None, limit: int = None) -> list[GiteaStopWatch] or None:
         """Get stopwatches of token owner.
+
+        Args:
+            page (int, optional): page number of results to return. (1-based) Defaults to None.
+            limit (int, optional): page size of results. Defaults to None.
 
         Raises:
             GiteaAPIError: When gitea api status code does not 200(success).
@@ -894,7 +926,7 @@ class GiteaHandler:
         Returns:
             list[GiteaStopWatch] or None: Stopwatches that was get, If there is no stopwatch, return None.
         """        
-        response = requests.get(f"{self.url}/user/stopwatches", params=self.defaultparam)
+        response = requests.get(f"{self.url}/user/stopwatches", params=self.defaultparam | self.__pagelimitdetect__(page, limit))
         if response.status_code != 200:
             raise GiteaAPIError(response, response.status_code)
         if response.json() == []:
@@ -911,6 +943,26 @@ class GiteaHandler:
             )
             for i in response.json()
         ]
+
+    def get_watching_repositories(self, page: int = None, limit: int = None) -> list[GiteaRepository] or None:
+        """Get repositories that token owner watching.
+
+        Args:
+            page (int, optional): page number of results to return. (1-based) Defaults to None.
+            limit (int, optional): page size of results. Defaults to None.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            list[GiteaRepository] or None: Repositories that was get, If there is no repository, return None.
+        """        
+        response = requests.get(f"{self.url}/user/subscriptions", params=self.defaultparam | self.__pagelimitdetect__(page, limit))
+        if response.status_code != 200:
+            raise GiteaAPIError(response, response.status_code)
+        if response.json() == []:
+            return None
+        return [GiteaRepository(i) for i in response.json()]
 
     def __response_to_settings__(self, response: dict) -> GiteaSettings:
         """Convert response to settings.

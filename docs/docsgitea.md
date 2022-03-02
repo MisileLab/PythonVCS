@@ -17,7 +17,7 @@
     - [Method add_public_key](#method-add_public_key)
     - [Method get_public_key](#method-get_public_key)
     - [Method delete_public_key](#method-delete_public_key)
-    - [Method get_repos](#method-get_repos)
+    - [Method get_repositories](#method-get_repositories)
     - [Method create_repository](#method-create_repository)
     - [Method get_settings](#method-get_settings)
     - [Method change_settings](#method-change_settings)
@@ -26,6 +26,7 @@
     - [Method star_repository](#method-star_repository)
     - [Method unstar_repository](#method-unstar_repository)
     - [Method get_stopwatches](#method-get_stopwatches)
+    - [Method get_watching_repositories](#method-get_watching_repositories)
   - [Class GiteaAPIError: Exception](#class-giteaapierror-exception)
   - [Class WrongJSONError: Exception](#class-wrongjsonerror-exception)
   - [Class GiteaUser](#class-giteauser)
@@ -277,9 +278,14 @@ Delete public key of token owner.
 
     GiteaAPIError: When gitea api status code does not 204(success).
 
-### Method get_repos
+### Method get_repositories
 
     get repositories of token owner.
+
+#### Arguments
+
+    page (int, optional): page number of results to return. (1-based) Defaults to None.
+    limit (int, optional): page size of results. Defaults to None.
 
 #### Raises
 
@@ -352,7 +358,12 @@ Change setting of token owner.
 
 ### Method get_starred_repositories
 
-    Get starred repositories of token owner.
+Get starred repositories of token owner.
+
+#### Arguments
+
+    page (int, optional): page number of results to return. (1-based) Defaults to None.
+    limit (int, optional): page size of results. Defaults to None.
 
 #### Raises
 
@@ -364,7 +375,7 @@ Change setting of token owner.
 
 ### Method star_repository
 
-    Star repository.
+Star repository.
 
 #### Arguments
 
@@ -377,7 +388,7 @@ Change setting of token owner.
 
 ### Method unstar_repository
 
-    Unstar repository.
+Unstar repository.
 
 #### Arguments
 
@@ -390,7 +401,12 @@ Change setting of token owner.
 
 ### Method get_stopwatches
 
-    Get stopwatches of token owner.
+Get stopwatches of token owner.
+
+#### Arguments
+
+    page (int, optional): page number of results to return. (1-based) Defaults to None.
+    limit (int, optional): page size of results. Defaults to None.
 
 #### Raises
 
@@ -399,6 +415,23 @@ Change setting of token owner.
 #### Returns
 
     list[GiteaStopWatch] or None: Stopwatches that was get, If there is no stopwatch, return None.
+
+### Method get_watching_repositories
+
+Get repositories that token owner watching.
+
+#### Arguments
+
+    page (int, optional): page number of results to return. (1-based) Defaults to None.
+    limit (int, optional): page size of results. Defaults to None.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 200(success).
+
+#### Returns
+
+    list[GiteaRepository] or None: Repositories that was get, If there is no repository, return None.
 
 ## Class GiteaAPIError: Exception
 
