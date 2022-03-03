@@ -8,14 +8,8 @@ api_key = os.getenv("gitea_token")
 
 giteahandler = GiteaHandler("MisileLaboratory", None, "https://gitea.chizstudio.com/", api_key, False)
 
-for i in giteahandler.get_starred_repositories():
-    print(i.name)
-giteahandler.star_repository("MisileLaboratory", "base-repository")
+a = giteahandler.get_teams()
 
-for i in giteahandler.get_starred_repositories():
-    print(i.name)
-giteahandler.unstar_repository("MisileLaboratory", "base-repository")
-
-for i in giteahandler.get_starred_repositories():
-    print(i.name)
-giteahandler.star_repository("MisileLaboratory", "base-repository")
+if a is not None:
+    for i in a:
+        print(i.organization.username)

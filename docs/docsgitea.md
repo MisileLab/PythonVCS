@@ -27,6 +27,7 @@
     - [Method unstar_repository](#method-unstar_repository)
     - [Method get_stopwatches](#method-get_stopwatches)
     - [Method get_watching_repositories](#method-get_watching_repositories)
+    - [Method get_teams](#method-get_teams)
   - [Class GiteaAPIError: Exception](#class-giteaapierror-exception)
   - [Class WrongJSONError: Exception](#class-wrongjsonerror-exception)
   - [Class GiteaUser](#class-giteauser)
@@ -41,7 +42,7 @@
   - [Class GiteaInternalTracker](#class-giteainternaltracker)
   - [Class GiteaPermission](#class-giteapermission)
   - [Class GiteaRepoTransfer](#class-gitearepotransfer)
-  - [Class GiteaTeams](#class-giteateams)
+  - [Class GiteaTeam](#class-giteateam)
   - [Class GiteaOrganization](#class-giteaorganization)
   - [Class GiteaStopWatch](#class-giteastopwatch)
 
@@ -433,6 +434,23 @@ Get repositories that token owner watching.
 
     list[GiteaRepository] or None: Repositories that was get, If there is no repository, return None.
 
+### Method get_teams
+
+    Get teams that token owner is member of.
+
+#### Arguments
+
+    page (int, optional): page number of results to return. (1-based) Defaults to None.
+    limit (int, optional): page size of results. Defaults to None.
+
+#### Raises
+
+    GiteaAPIError: When gitea api status code does not 200(success).
+
+#### Returns
+
+    list[GiteaTeam] or None: Teams that was get, If there is no team, return None.
+
 ## Class GiteaAPIError: Exception
 
 raised when api does not success.
@@ -562,7 +580,7 @@ GPGKey a user GPG key to sign commit and tag in repository.
     recipient (GiteaUser): The user who will receive the transfer.
     teams (list[str]): The teams that will be transferred
 
-## Class GiteaTeams
+## Class GiteaTeam
 
     A team in an organization.
 
@@ -575,7 +593,6 @@ GPGKey a user GPG key to sign commit and tag in repository.
     name (str): Name of team
     organization (GiteaOrganization): Organization of team
     permission (str): Permission of team
-    repos_url (str): Repos url of team
     units (list): Units of team
     units_map (dict): Units dict of team
 

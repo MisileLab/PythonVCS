@@ -2,8 +2,6 @@
 Support gitea module.
 """
 
-warning = """not tested about this feature yet, maybe some person can test."""
-
 import requests
 from requests import Response
 from secrets import SystemRandom
@@ -11,9 +9,10 @@ import hashlib
 
 def not_tested_warning(func):
 
-    def wrapper_func():
-        warning = f"not tested about {func.__name__} yet, maybe some person can test, then pull request to this repository, please."
-        print(warning)
+    def wrapper_func(*args, **kwargs):
+        print(f"not tested about {func.__name__} yet, maybe some person can test, then pull request to this repository, please.")
+
+        return func(*args, **kwargs)
 
     return wrapper_func
 
@@ -61,10 +60,10 @@ class GiteaOrganization:
         self.visibility = visibility
         self.website = website
 
-class GiteaTeams:
+class GiteaTeam:
     """A team in an organization"""
     def __init__(self, can_create_repo: bool, description: str, teamid: int, include_all_repositories: bool, 
-                name: str, organization: GiteaOrganization, permission: str, repos_url: str, units: list, units_map: dict):
+                name: str, organization: GiteaOrganization, permission: str, units: list, units_map: dict):
         """Initalize class
 
         Args:
@@ -75,7 +74,6 @@ class GiteaTeams:
             name (str): Name of team
             organization (GiteaOrganization): Organization of team
             permission (str): Permission of team
-            repos_url (str): Repos url of team
             units (list): Units of team
             units_map (dict): Units dict of team
 
@@ -91,7 +89,6 @@ class GiteaTeams:
         self.permission = permission
         if self.permission not in ["none", "read", "write", "admin", "owner"]:
             raise ValueError("Permission is wrong.")
-        self.repos_url = repos_url
         self.units = units
         self.units_map = units_map
 
@@ -356,12 +353,12 @@ class GiteaRepoTransfer:
         """
         self.doer = doer
         self.recipient = recipient
-        self.teams: list[GiteaTeams] = []
+        self.teams: list[GiteaTeam] = []
         for i in teams:
             tempdata = i["organization"]
             organization = GiteaOrganization(tempdata["avatar_url"], tempdata["description"], tempdata["full_name"], tempdata["id"], tempdata["location"], tempdata["repo_admin_change_team_access"],
                                             tempdata["username"], tempdata["visibility"], tempdata["website"])
-            self.teams.append(GiteaTeams(i["can_create_repo"], i["description"], i["id"], i["include_all_repositories"], i["name"], organization, i["permission"], i["repo_url"], i["units"], i["units_map"]))
+            self.teams.append(GiteaTeam(i["can_create_repo"], i["description"], i["id"], i["include_all_repositories"], i["name"], organization, i["permission"], i["units"], i["units_map"]))
 
 
 class GiteaExtenalTracker:
@@ -943,8 +940,6 @@ class GiteaHandler:
             for i in response.json()
         ]
 
-        """not tested yet after this repository."""
-
     def get_watching_repositories(self, page: int = None, limit: int = None) -> list[GiteaRepository] or None:
         """Get repositories that token owner watching.
 
@@ -964,6 +959,33 @@ class GiteaHandler:
         if response.json() == []:
             return None
         return [GiteaRepository(i) for i in response.json()]
+
+    def get_teams(self, page: int = None, limit: int = None) -> list[GiteaTeam] or None:
+        """Get teams that token owner is member of.
+
+        Args:
+            page (int, optional): page number of results to return. (1-based) Defaults to None.
+            limit (int, optional): page size of results. Defaults to None.
+
+        Raises:
+            GiteaAPIError: When gitea api status code does not 200(success).
+
+        Returns:
+            list[GiteaTeam] or None: Teams that was get, If there is no team, return None.
+        """
+        response = requests.get(f"{self.url}/user/teams", params=self.defaultparam | self.__pagelimitdetect__(page, limit))
+        if response.status_code != 200:
+            raise GiteaAPIError(response, response.status_code)
+        if response.json() == []:
+            return None
+        a = []
+        for i in response.json():
+            tempdata = i["organization"]
+            organization = GiteaOrganization(tempdata["avatar_url"], tempdata["description"], tempdata["full_name"], tempdata["id"], tempdata["location"], tempdata["repo_admin_change_team_access"],
+                                            tempdata["username"], tempdata["visibility"], tempdata["website"])
+            a.append(GiteaTeam(i["can_create_org_repo"], i["description"], i["id"], i["includes_all_repositories"], i["name"], organization, i["permission"], i["units"], i["units_map"]))
+        return a
+
 
     def __response_to_settings__(self, response: dict) -> GiteaSettings:
         """Convert response to settings.
