@@ -1,4 +1,4 @@
-from pythonvcs.gitea import GiteaHandler, GiteaAPIError
+from pythonvcs.gitea import GiteaHandler
 from dotenv import load_dotenv
 import os
 
@@ -8,18 +8,14 @@ api_key = os.getenv("gitea_token")
 
 giteahandler = GiteaHandler("MisileLaboratory", None, "https://gitea.chizstudio.com/", api_key, False)
 
-theme = giteahandler.get_settings().theme
-print(theme)
+for i in giteahandler.get_starred_repositories():
+    print(i.name)
+giteahandler.star_repository("MisileLaboratory", "base-repository")
 
-try:
-    giteahandler.change_setting("theme", "gitea")
-except GiteaAPIError as e:
-    print(e.raw_data.content)
+for i in giteahandler.get_starred_repositories():
+    print(i.name)
+giteahandler.unstar_repository("MisileLaboratory", "base-repository")
 
-theme = giteahandler.get_settings().theme
-print(theme)
-
-giteahandler.change_setting("theme", "arc-green")
-
-theme = giteahandler.get_settings().theme
-print(theme)
+for i in giteahandler.get_starred_repositories():
+    print(i.name)
+giteahandler.star_repository("MisileLaboratory", "base-repository")

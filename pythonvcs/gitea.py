@@ -862,8 +862,6 @@ class GiteaHandler:
         setting.__setattr__(new_setting_name, new_setting_value)
         return self.change_settings(setting)
 
-    """not tested yet after this repository."""
-
     def get_starred_repositories(self, page: int = None, limit: int = None) -> list[GiteaRepository] or list:
         """Get starred repositories of token owner.
 
@@ -913,6 +911,7 @@ class GiteaHandler:
         if response.status_code != 204:
             raise GiteaAPIError(response, response.status_code)
 
+    @not_tested_warning
     def get_stopwatches(self, page: int = None, limit: int = None) -> list[GiteaStopWatch] or None:
         """Get stopwatches of token owner.
 
@@ -943,6 +942,8 @@ class GiteaHandler:
             )
             for i in response.json()
         ]
+
+        """not tested yet after this repository."""
 
     def get_watching_repositories(self, page: int = None, limit: int = None) -> list[GiteaRepository] or None:
         """Get repositories that token owner watching.
