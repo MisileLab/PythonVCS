@@ -1,7 +1,3 @@
-"""
-Support gitea module.
-"""
-
 import requests
 from requests import Response
 from secrets import SystemRandom
@@ -351,17 +347,20 @@ class GiteaLabel:
         self.url = url
 
 class GiteaMilestone:
-    """Milestone is a collection of issues on one repository"""
     def __init__(self, closed_at: str, closed_issues: int, created_at: str, description: str, due_on: str, open_issues: int, state: str, title: str, updated_at: str):
-        """Initalize class
-
-            Parameters
-            ----------
-            closed_at: :class:`str`
-                The name of the option choice (visible to users).
-            closed_issues: :class:`int`
-                The value of the option choice.
         """
+
+        Args:
+            closed_at (str): _description_
+            closed_issues (int): _description_
+            created_at (str): _description_
+            description (str): _description_
+            due_on (str): _description_
+            open_issues (int): _description_
+            state (str): _description_
+            title (str): _description_
+            updated_at (str): _description_
+        """        
         self.closed_at = closed_at
         self.closed_issues = closed_issues
         self.created_at = created_at
@@ -376,6 +375,7 @@ class GiteaIssue:
     """An issue in a repository"""
     def __init__(self, assignee: GiteaUser, assignees: list[GiteaUser], body: str, closed_time: str, comments: int, created_at: str, due_date: str,
                  html_url: str, issueid: int, is_blocked: bool, labels: list[GiteaLabel]):
+                 print("a")
 
 class GiteaTrackedTime:
     """TrackedTime worked time for an issue / pr"""
