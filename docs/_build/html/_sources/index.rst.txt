@@ -11,10 +11,10 @@ Welcome to PythonVCS's documentation!
    :caption: Contents:
 
 
+Some PythonVCS docs
+===================
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. toctree::
+   :maxdepth: 1
+   
+   Gitea <gitea/index.rst>
