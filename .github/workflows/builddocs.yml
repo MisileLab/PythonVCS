@@ -17,8 +17,6 @@ jobs:
           architecture: 'x64'
       - name: Install Poetry
         uses: snok/install-poetry@v1
-      - name: Test
-        run: "pip install -U sphinx"
       - name: Install dependencies
         run: "poetry install"
       - name: Generate docs
