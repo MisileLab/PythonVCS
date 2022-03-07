@@ -13,8 +13,8 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
-          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+          python-version: '3.10 - 3.10.2'
+          architecture: 'x64'
       - name: Install Poetry
         uses: snok/install-poetry@v1
       - name: Install dependencies
