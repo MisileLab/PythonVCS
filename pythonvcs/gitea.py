@@ -341,6 +341,64 @@ class GiteaUser:
         else:
             return None
 
+class GiteaLabel:
+    """Label a label to an issue or a pr"""
+    def __init__(self, color: str, description: str, labelid: int, name: str, url: str):
+        self.color = color
+        self.description = description
+        self.labelid = labelid
+        self.name = name
+        self.url = url
+
+class GiteaMilestone:
+    """Milestone is a collection of issues on one repository"""
+    def __init__(self, closed_at: str, closed_issues: int, created_at: str, description: str, due_on: str, open_issues: int, state: str, title: str, updated_at: str):
+        """Initalize class
+
+            Parameters
+            ----------
+            closed_at: :class:`str`
+                The name of the option choice (visible to users).
+            closed_issues: :class:`int`
+                The value of the option choice.
+        """
+        self.closed_at = closed_at
+        self.closed_issues = closed_issues
+        self.created_at = created_at
+        self.description = description
+        self.due_on = due_on
+        self.open_issues = open_issues
+        self.state = state
+        self.title = title
+        self.updated_at = updated_at
+
+class GiteaIssue:
+    """An issue in a repository"""
+    def __init__(self, assignee: GiteaUser, assignees: list[GiteaUser], body: str, closed_time: str, comments: int, created_at: str, due_date: str,
+                 html_url: str, issueid: int, is_blocked: bool, labels: list[GiteaLabel]):
+
+class GiteaTrackedTime:
+    """TrackedTime worked time for an issue / pr"""
+    def __init__(self, created: str, timeid: int, issue, issue_id: int, time: int, user_id: int, user_name: str):
+        """Initialize class
+
+        Args:
+            created (str): created time
+            timeid (int): id of TrackedTime
+            issue: issue that related.
+            issue_id (int): Id of issue
+            time (int): Time in seconds
+            user_id (int): Id of user
+            user_name (str): Name of user
+        """
+        self.created = created
+        self.timeid = timeid
+        self.issue = issue
+        self.issue_id = issue_id
+        self.time = time
+        self.user_id = user_id
+        self.user_name = user_name
+
 class GiteaRepoTransfer:
     """A pending repo transfer."""
     def __init__(self, doer: GiteaUser, recipient: GiteaUser, teams: list[str]):
