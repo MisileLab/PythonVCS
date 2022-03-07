@@ -23,6 +23,7 @@ jobs:
         run: "poetry install"
       - name: Generate docs
         run: |
+          poetry shell
           cd docs
           make html
       - name: Some commits
