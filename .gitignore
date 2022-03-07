@@ -4,6 +4,5 @@ dist
 *.code-workspace
 __pycache__
 .vscode
-docs/_build
 .env
 *.pyc
