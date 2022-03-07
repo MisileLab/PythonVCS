@@ -18,7 +18,7 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
       - name: Test
-        run: "pip install -U sphinx"
+        run: "pip install -U sphinx sphinx_rtd_theme"
       - name: Install dependencies
         run: "poetry install"
       - name: Generate docs
