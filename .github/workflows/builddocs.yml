@@ -23,9 +23,8 @@ jobs:
         run: "poetry install"
       - name: Generate docs
         run: |
-          poetry shell
           cd docs
-          make html
+          poetry run make html
       - name: Some commits
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
