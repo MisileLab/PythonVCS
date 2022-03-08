@@ -7,4 +7,3 @@ __pycache__
 .env
 *.pyc
 docs/_build
-.gitignore

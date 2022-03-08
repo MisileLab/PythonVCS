@@ -20,8 +20,18 @@ class GiteaTrustModel:
     collaboratorcomitter = "collaboratorcomitter"
 
 class GiteaStopWatch:
-    """Running stop watch for gitea."""
-    def __init__(self, created: str, duration: str, issue_index: int, issue_title: str, repo_name: str, repo_owner_name: str, seconds: int):
+    """Running stop watch for gitea.
+
+    Args:
+        created (str): created time of stop watch.
+        duration (str): duration of stop watch.
+        issue_index (int): index of issue.
+        issue_title (str): title of issue.
+        repo_name (str): name of repository.
+        repo_owner_name (str): name of repository owner.
+        seconds (int): seconds of stop watch.
+        """
+    def __init__(self, created: str, duration: str, issue_index: int, issue_title: str, repo_name: str, repo_owner_name: str, seconds: int):     
         self.created = created
         self.duration = duration
         self.issue_index = issue_index
@@ -31,21 +41,20 @@ class GiteaStopWatch:
         self.seconds = seconds
 
 class GiteaOrganization:
-    """Gitea organization properties."""
+    """Gitea organization properties.
+    
+    Args:
+        avatar_url (str): Avatar url of Organization
+        description (str): Description of Organization
+        full_name (str): Full name of Organization
+        giteaid (int): ID of Organization
+        location (str): Location of Organization
+        repo_admin_change_team_access (bool): Repo admin change team access value
+        username (str): Username of Organization
+        visibility (str): Visibility of Organization
+        website (str): Website of Organization
+    """
     def __init__(self, avatar_url: str, description: str, full_name: str, giteaid: int, location: str, repo_admin_change_team_access: bool, username: str, visibility: str, website: str):
-        """Initalize class
-
-        Args:
-            avatar_url (str): Avatar url of Organization
-            description (str): Description of Organization
-            full_name (str): Full name of Organization
-            giteaid (int): ID of Organization
-            location (str): Location of Organization
-            repo_admin_change_team_access (bool): Repo admin change team access value
-            username (str): Username of Organization
-            visibility (str): Visibility of Organization
-            website (str): Website of Organization
-        """
         self.avatar_url = avatar_url
         self.description = description
         self.full_name = full_name
@@ -57,25 +66,24 @@ class GiteaOrganization:
         self.website = website
 
 class GiteaTeam:
-    """A team in an organization"""
+    """A team in an organization
+    
+    Args:
+        can_create_repo (bool): Can create repository value
+        description (str): Description of team
+        teamid (int): ID of team
+        include_all_repositories (bool): Include all repositories value
+        name (str): Name of team
+        organization (GiteaOrganization): Organization of team
+        permission (str): Permission of team
+        units (list): Units of team
+        units_map (dict): Units dict of team
+
+    Raises:
+        ValueError: If permission value is wrong.
+    """
     def __init__(self, can_create_repo: bool, description: str, teamid: int, include_all_repositories: bool, 
                 name: str, organization: GiteaOrganization, permission: str, units: list, units_map: dict):
-        """Initalize class
-
-        Args:
-            can_create_repo (bool): Can create repository value
-            description (str): Description of team
-            teamid (int): ID of team
-            include_all_repositories (bool): Include all repositories value
-            name (str): Name of team
-            organization (GiteaOrganization): Organization of team
-            permission (str): Permission of team
-            units (list): Units of team
-            units_map (dict): Units dict of team
-
-        Raises:
-            ValueError: If permission value is wrong.
-        """
         self.can_create_repo = can_create_repo
         self.description = description
         self.id = teamid
@@ -89,7 +97,13 @@ class GiteaTeam:
         self.units_map = units_map
 
 class GiteaPermission:
-    """Gitea permissions properties."""
+    """Gitea permissions properties.
+    
+        Args:
+            admin (bool): admin permission
+            push (bool): push permission
+            pull (bool): pull permission
+    """
     def __init__(self, admin: bool, push: bool, pull: bool):
         """Initalize class
 
@@ -103,49 +117,46 @@ class GiteaPermission:
         self.pull = pull
 
 class GiteaExternalWiki:
-    """setting for external wiki"""
+    """setting for external wiki
+    
+    Args:
+        external_url (str): external wiki url
+    """
     def __init__(self, external_url: str):
-        """Initalize Class
-
-        Args:
-            external_url (str): external wiki url
-        """
         self.external_url = external_url
 
 class GiteaInternalTracker:
-    """Gitea internal tracker settings properties."""
+    """Gitea internal tracker settings properties.
+    
+    Args:
+        allow_only_contributors_to_track_time (bool): Let only contributors track time (Built-in issue tracker)
+        enable_issue_dependencies (bool): Enable dependencies for issues and pull requests (Built-in issue tracker)
+        enable_time_tracker (bool): Enable time tracking (Built-in issue tracker)
+    """
     def __init__(self, allow_only_contributors_to_track_time: bool, enable_issue_dependencies: bool, enable_time_tracker: bool):
-        """Initalize Class
-
-        Args:
-            allow_only_contributors_to_track_time (bool): Let only contributors track time (Built-in issue tracker)
-            enable_issue_dependencies (bool): Enable dependencies for issues and pull requests (Built-in issue tracker)
-            enable_time_tracker (bool): Enable time tracking (Built-in issue tracker)
-        """
         self.allow_only_contributors_to_track_time = allow_only_contributors_to_track_time
         self.enable_issue_dependencies = enable_issue_dependencies
         self.enable_time_tracker = enable_time_tracker
 
 class GiteaRepoOption:
-    """GiteaRepoOption for making gitea repository"""
+    """GiteaRepoOption for making gitea repository
+    
+    Args:
+        name (str): Repository name
+        auto_init (bool, optional): Auto initliaze repository. Defaults to None.
+        default_branch (str, optional): Default branch name. Defaults to None.
+        description (str, optional): Repository description. Defaults to None.
+        gitignore (str, optional): Gitignore template. Defaults to None.
+        issue_labels (str, optional): Issue labels tamplate. Defaults to None.
+        license_template (str, optional): License template. Defaults to None.
+        private (bool, optional): Repository visibility. Defaults to None.
+        readme (str, optional): Readme description. Defaults to None.
+        template (bool, optional): What template to use. Defaults to None.
+        trust_model (GiteaTrustModel, optional): Trust model. Defaults to None.
+    """
     def __init__(self, name: str, auto_init: bool = None, default_branch: str = None, description: str = None, gitignore: str = None,
                     issue_labels: str = None, license_template: str = None, private: bool = None, readme: str = None, template: bool = None,
                     trust_model: GiteaTrustModel = None):
-        """Initalize Class
-
-        Args:
-            name (str): Repository name
-            auto_init (bool, optional): Auto initliaze repository. Defaults to None.
-            default_branch (str, optional): Default branch name. Defaults to None.
-            description (str, optional): Repository description. Defaults to None.
-            gitignore (str, optional): Gitignore template. Defaults to None.
-            issue_labels (str, optional): Issue labels tamplate. Defaults to None.
-            license_template (str, optional): License template. Defaults to None.
-            private (bool, optional): Repository visibility. Defaults to None.
-            readme (str, optional): Readme description. Defaults to None.
-            template (bool, optional): What template to use. Defaults to None.
-            trust_model (GiteaTrustModel, optional): Trust model. Defaults to None.
-        """
         self.name = name
         self.auto_init = auto_init
         self.default_branch = default_branch
@@ -159,21 +170,20 @@ class GiteaRepoOption:
         self.trust_model = trust_model
 
 class GiteaSettings:
-    """Gitea settings properties."""
-    def __init__(self, description: str, diff_view_style: str, full_name: str, hide_activity: bool, hide_email: bool, language: str, location: str, theme: str, website: str):
-        """Initalize class
-
-        Args:
-            description (str): Description of user
-            diff_view_style (str): Diff view style of user
-            full_name (str): Full name of user
-            hide_activity (bool): Hide activity value of user
-            hide_email (bool): Hide email value of user
-            language (str): Language of user
-            location (str): Location of user
-            theme (str): Theme of user
-            website (str): Website of user
-        """        
+    """Gitea settings properties.
+    
+    Args:
+        description (str): Description of user
+        diff_view_style (str): Diff view style of user
+        full_name (str): Full name of user
+        hide_activity (bool): Hide activity value of user
+        hide_email (bool): Hide email value of user
+        language (str): Language of user
+        location (str): Location of user
+        theme (str): Theme of user
+        website (str): Website of user
+    """
+    def __init__(self, description: str, diff_view_style: str, full_name: str, hide_activity: bool, hide_email: bool, language: str, location: str, theme: str, website: str):  
         self.description = description
         self.diff_view_style = diff_view_style
         self.full_name = full_name
@@ -185,16 +195,15 @@ class GiteaSettings:
         self.website = website
 
 class GiteaPublicKey:
-    """Gitea public key object."""
+    """Gitea public key object.
+    
+    Args:
+        responsejson (dict): Response json.
+
+    Raises:
+        WrongJSONError: If response json is not valid, raise this error.
+    """
     def __init__(self, responsejson: dict):
-        """Generate gitea public key.
-
-        Args:
-            responsejson (dict): Response json.
-
-        Raises:
-            WrongJSONError: If response json is not valid, raise this error.
-        """
         try:
             self.created_at: str = responsejson['created_at']
         except (ValueError, KeyError, TypeError) as e:
@@ -209,27 +218,27 @@ class GiteaPublicKey:
         self.user = GiteaUser(responsejson['user'])
 
 class GPGKeyEmail:
-    def __init__(self, email: str, verified: bool):
-        """
-        GPG key email properties.
+    """
+    GPG key email properties.
 
-        Args:
-            email (str): Email address.
-            verified (bool): Is verified email.
-        """
+    Args:
+        email (str): Email address.
+        verified (bool): Is verified email.
+    """
+    def __init__(self, email: str, verified: bool):
         self.email: str = email
         self.verified: bool = verified
 
 class GiteaEmail(GPGKeyEmail):
-    def __init__(self, email: str, primary: bool, verified: bool):
-        """
-        Gitea email properties.
+    """
+    Gitea email properties.
 
-        Args:
-            email (str): Email address.
-            primary (bool): Is primary email.
-            verified (bool): Is verified email.
-        """
+    Args:
+        email (str): Email address.
+        primary (bool): Is primary email.
+        verified (bool): Is verified email.
+    """
+    def __init__(self, email: str, primary: bool, verified: bool):
         super().__init__(email, verified)
         self.primary: bool = primary
 
@@ -253,16 +262,15 @@ class Visibility:
     private = "private"
 
 class GiteaGPGKey:
-    """GPGKey a user GPG key to sign commit and tag in repository"""
+    """GPGKey a user GPG key to sign commit and tag in repository
+    
+    Args:
+        jsondict (dict): Gitea GPGKey json dict.
+
+    Raises:
+        WrongJSONError: When JSON does not have right key.
+    """
     def __init__(self, jsondict: dict):
-        """Generate GPG Key properties from jsondict.
-
-        Args:
-            jsondict (dict): Gitea GPGKey json dict.
-
-        Raises:
-            WrongJSONError: When JSON does not have right key.
-        """
         try:
             self.certify: bool = jsondict["can_certify"]
         except (KeyError, ValueError, TypeError) as e:

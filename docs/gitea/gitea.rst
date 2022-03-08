@@ -1,3 +1,6 @@
+Gitea API Wrapper
+=================
+
 .. toctree::
    :maxdepth: 2
    
